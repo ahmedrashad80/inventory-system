@@ -1,6 +1,5 @@
-
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Package,
   Plus,
@@ -12,36 +11,57 @@ import {
   Settings,
   Eye,
   Upload,
-  Download
-} from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
-import { useComponents } from '@/hooks/useComponents';
+  Download,
+} from "lucide-react";
+import { toast } from "@/hooks/use-toast";
+import { useComponents } from "@/hooks/useComponents";
+import ComponentMovements from "@/components/components/ComponentMovements";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 
 const Components = () => {
-  const { components, isLoading, addComponent, updateComponent, deleteComponent, stockIn } = useComponents();
-  const [searchTerm, setSearchTerm] = useState('');
+  const {
+    components,
+    isLoading,
+    addComponent,
+    updateComponent,
+    deleteComponent,
+    stockIn,
+  } = useComponents();
+  const [searchTerm, setSearchTerm] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showStockModal, setShowStockModal] = useState(false);
   const [selectedComponent, setSelectedComponent] = useState(null);
   const [formData, setFormData] = useState({
-    code: '',
-    name: '',
-    quantity: '',
-    unit_price: '',
-    supplier: '',
-    image: null
+    code: "",
+    name: "",
+    quantity: "",
+    unit_price: "",
+    supplier: "",
+    image: null,
   });
   const [stockData, setStockData] = useState({
-    quantity: '',
-    reason: ''
+    quantity: "",
+    reason: "",
+  });
+
+  const { data: movementsData, isLoading: isMovementsLoading } = useQuery({
+    queryKey: ["component-movements"],
+
+    queryFn: async () => {
+      const response = await axios.get(
+        "http://localhost:5000/api/components/movements"
+      );
+      return response.data.movements;
+    },
   });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const formDataToSend = new FormData();
-      Object.keys(formData).forEach(key => {
+      Object.keys(formData).forEach((key) => {
         if (formData[key] !== null) {
           formDataToSend.append(key, formData[key]);
         }
@@ -50,7 +70,7 @@ const Components = () => {
       if (selectedComponent) {
         await updateComponent.mutateAsync({
           id: selectedComponent._id,
-          data: formDataToSend
+          data: formDataToSend,
         });
       } else {
         await addComponent.mutateAsync(formDataToSend);
@@ -58,14 +78,16 @@ const Components = () => {
 
       toast({
         title: "تم بنجاح",
-        description: selectedComponent ? "تم تحديث المكون بنجاح" : "تم إضافة المكون بنجاح",
+        description: selectedComponent
+          ? "تم تحديث المكون بنجاح"
+          : "تم إضافة المكون بنجاح",
       });
 
       resetForm();
       setShowAddModal(false);
       setShowEditModal(false);
     } catch (error) {
-      console.error('Error saving component:', error);
+      console.error("Error saving component:", error);
       toast({
         title: "خطأ",
         description: "فشل في حفظ المكون",
@@ -81,21 +103,20 @@ const Components = () => {
         id: selectedComponent._id,
         data: {
           quantity: parseInt(stockData.quantity),
-          reason: stockData.reason
-        }
+          reason: stockData.reason,
+        },
       });
-
 
       toast({
         title: "تم بنجاح",
         description: `تم إضافة ${stockData.quantity} وحدة للمخزون`,
       });
 
-      setStockData({ quantity: '', reason: '' });
+      setStockData({ quantity: "", reason: "" });
       setShowStockModal(false);
       setSelectedComponent(null);
     } catch (error) {
-      console.error('Error updating stock:', error);
+      console.error("Error updating stock:", error);
       toast({
         title: "خطأ",
         description: "فشل في تحديث المخزون",
@@ -105,44 +126,44 @@ const Components = () => {
   };
 
   const handleAddComponent = async (e) => {
-      e.preventDefault();
-      try {
-        // Ensure required fields are included
-        if (!formData.code || !formData.name) {
-          toast({
-            title: "خطأ",
-            description: "كود المكون واسم المكون مطلوبان",
-            variant: "destructive",
-          });
-          return;
-        }
+    e.preventDefault();
+    try {
+      // Ensure required fields are included
+      if (!formData.code || !formData.name) {
+        toast({
+          title: "خطأ",
+          description: "كود المكون واسم المكون مطلوبان",
+          variant: "destructive",
+        });
+        return;
+      }
 
-        // Create data object for JSON submission
-        const componentData = {
-          code: formData.code,
-          name: formData.name,
-          quantity: parseInt(formData.quantity) || 0,
-          unit_price: parseFloat(formData.unit_price) || 0,
-          supplier: formData.supplier || ""
-        };
+      // Create data object for JSON submission
+      const componentData = {
+        code: formData.code,
+        name: formData.name,
+        quantity: parseInt(formData.quantity) || 0,
+        unit_price: parseFloat(formData.unit_price) || 0,
+        supplier: formData.supplier || "",
+      };
 
-        // If there's an image, use FormData instead
-        if (formData.image) {
-          const formDataToSend = new FormData();
+      // If there's an image, use FormData instead
+      if (formData.image) {
+        const formDataToSend = new FormData();
 
-          // Add all form fields to FormData
-          Object.keys(componentData).forEach(key => {
-            formDataToSend.append(key, componentData[key]);
-          });
+        // Add all form fields to FormData
+        Object.keys(componentData).forEach((key) => {
+          formDataToSend.append(key, componentData[key]);
+        });
 
-          // Add the image
-          formDataToSend.append('image', formData.image);
+        // Add the image
+        formDataToSend.append("image", formData.image);
 
-          await addComponent.mutateAsync(formDataToSend);
-        } else {
-          // No image, use JSON
-          await addComponent.mutateAsync(componentData);
-        }
+        await addComponent.mutateAsync(formDataToSend);
+      } else {
+        // No image, use JSON
+        await addComponent.mutateAsync(componentData);
+      }
 
       toast({
         title: "تم بنجاح",
@@ -152,7 +173,7 @@ const Components = () => {
       resetForm();
       setShowAddModal(false);
     } catch (error) {
-      console.error('Error adding component:', error);
+      console.error("Error adding component:", error);
       toast({
         title: "خطأ",
         description: error.response?.data?.message || "فشل في إضافة المكون",
@@ -162,50 +183,50 @@ const Components = () => {
   };
 
   const handleUpdateComponent = async (e) => {
-      e.preventDefault();
-      try {
-        // Ensure required fields are included
-        if (!formData.code || !formData.name) {
-          toast({
-            title: "خطأ",
-            description: "كود المكون واسم المكون مطلوبان",
-            variant: "destructive",
-          });
-          return;
-        }
+    e.preventDefault();
+    try {
+      // Ensure required fields are included
+      if (!formData.code || !formData.name) {
+        toast({
+          title: "خطأ",
+          description: "كود المكون واسم المكون مطلوبان",
+          variant: "destructive",
+        });
+        return;
+      }
 
-        // Create data object for JSON submission
-        const componentData = {
-          code: formData.code,
-          name: formData.name,
-          quantity: parseInt(formData.quantity) || 0,
-          unit_price: parseFloat(formData.unit_price) || 0,
-          supplier: formData.supplier || ""
-        };
+      // Create data object for JSON submission
+      const componentData = {
+        code: formData.code,
+        name: formData.name,
+        quantity: parseInt(formData.quantity) || 0,
+        unit_price: parseFloat(formData.unit_price) || 0,
+        supplier: formData.supplier || "",
+      };
 
-        // If there's an image, use FormData instead
-        if (formData.image) {
-          const formDataToSend = new FormData();
+      // If there's an image, use FormData instead
+      if (formData.image) {
+        const formDataToSend = new FormData();
 
-          // Add all form fields to FormData
-          Object.keys(componentData).forEach(key => {
-            formDataToSend.append(key, componentData[key]);
-          });
+        // Add all form fields to FormData
+        Object.keys(componentData).forEach((key) => {
+          formDataToSend.append(key, componentData[key]);
+        });
 
-          // Add the image
-          formDataToSend.append('image', formData.image);
+        // Add the image
+        formDataToSend.append("image", formData.image);
 
-          await updateComponent.mutateAsync({
-            id: selectedComponent._id,
-            data: formDataToSend
-          });
-        } else {
-          // No image, use JSON
-          await updateComponent.mutateAsync({
-            id: selectedComponent._id,
-            data: componentData
-          });
-        }
+        await updateComponent.mutateAsync({
+          id: selectedComponent._id,
+          data: formDataToSend,
+        });
+      } else {
+        // No image, use JSON
+        await updateComponent.mutateAsync({
+          id: selectedComponent._id,
+          data: componentData,
+        });
+      }
 
       toast({
         title: "تم بنجاح",
@@ -215,7 +236,7 @@ const Components = () => {
       resetForm();
       setShowEditModal(false);
     } catch (error) {
-      console.error('Error updating component:', error);
+      console.error("Error updating component:", error);
       toast({
         title: "خطأ",
         description: error.response?.data?.message || "فشل في تحديث المكون",
@@ -225,7 +246,7 @@ const Components = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('هل أنت متأكد من حذف هذا المكون؟')) {
+    if (window.confirm("هل أنت متأكد من حذف هذا المكون؟")) {
       try {
         await deleteComponent.mutateAsync(id);
         toast({
@@ -233,7 +254,7 @@ const Components = () => {
           description: "تم حذف المكون بنجاح",
         });
       } catch (error) {
-        console.error('Error deleting component:', error);
+        console.error("Error deleting component:", error);
         toast({
           title: "خطأ",
           description: "فشل في حذف المكون",
@@ -245,12 +266,12 @@ const Components = () => {
 
   const resetForm = () => {
     setFormData({
-      code: '',
-      name: '',
-      quantity: '',
-      unit_price: '',
-      supplier: '',
-      image: null
+      code: "",
+      name: "",
+      quantity: "",
+      unit_price: "",
+      supplier: "",
+      image: null,
     });
     setSelectedComponent(null);
   };
@@ -262,8 +283,8 @@ const Components = () => {
       name: component.name,
       quantity: component.quantity.toString(),
       unit_price: component.unit_price.toString(),
-      supplier: component.supplier || '',
-      image: null
+      supplier: component.supplier || "",
+      image: null,
     });
     setShowEditModal(true);
   };
@@ -274,19 +295,27 @@ const Components = () => {
     setShowStockModal(true);
   };
 
-  const filteredComponents = components?.filter(component =>
-    component.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    component.code.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const filteredComponents =
+    components?.filter(
+      (component) =>
+        component.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        component.code.toLowerCase().includes(searchTerm.toLowerCase())
+    ) || [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100" dir="rtl">
+    <div
+      className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100"
+      dir="rtl"
+    >
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4 space-x-reverse">
-              <Link to="/" className="flex items-center text-gray-600 hover:text-gray-900 transition-colors">
+              <Link
+                to="/"
+                className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+              >
                 <ArrowLeft className="h-5 w-5 ml-2" />
                 العودة للرئيسية
               </Link>
@@ -296,8 +325,12 @@ const Components = () => {
                   <Package className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900">إدارة المكونات</h1>
-                  <p className="text-sm text-gray-600">عرض وإدارة مكونات المصنع</p>
+                  <h1 className="text-xl font-bold text-gray-900">
+                    إدارة المكونات
+                  </h1>
+                  <p className="text-sm text-gray-600">
+                    عرض وإدارة مكونات المصنع
+                  </p>
                 </div>
               </div>
             </div>
@@ -349,7 +382,9 @@ const Components = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 mb-1">إجمالي المكونات</p>
-                <p className="text-2xl font-bold text-gray-900">{components?.length || 0}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {components?.length || 0}
+                </p>
               </div>
               <div className="bg-blue-100 p-3 rounded-lg">
                 <Package className="h-6 w-6 text-blue-600" />
@@ -361,7 +396,8 @@ const Components = () => {
               <div>
                 <p className="text-sm text-gray-600 mb-1">إجمالي الكمية</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {components?.reduce((sum, comp) => sum + comp.quantity, 0) || 0}
+                  {components?.reduce((sum, comp) => sum + comp.quantity, 0) ||
+                    0}
                 </p>
               </div>
               <div className="bg-green-100 p-3 rounded-lg">
@@ -374,7 +410,13 @@ const Components = () => {
               <div>
                 <p className="text-sm text-gray-600 mb-1">إجمالي القيمة</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {(components?.reduce((sum, comp) => sum + (comp.quantity * comp.unit_price), 0) || 0).toFixed(2)} جنيه
+                  {(
+                    components?.reduce(
+                      (sum, comp) => sum + comp.quantity * comp.unit_price,
+                      0
+                    ) || 0
+                  ).toFixed(2)}{" "}
+                  جنيه
                 </p>
               </div>
               <div className="bg-purple-100 p-3 rounded-lg">
@@ -387,7 +429,9 @@ const Components = () => {
         {/* Components Table */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">قائمة المكونات</h3>
+            <h3 className="text-lg font-semibold text-gray-900">
+              قائمة المكونات
+            </h3>
           </div>
 
           {isLoading ? (
@@ -400,12 +444,24 @@ const Components = () => {
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الكود</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الاسم</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الكمية</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">سعر الوحدة</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">المورد</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الإجراءات</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      الكود
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      الاسم
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      الكمية
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      سعر الوحدة
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      المورد
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      الإجراءات
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -418,13 +474,15 @@ const Components = () => {
                         {component.name}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          component.quantity > 100
-                            ? 'bg-green-100 text-green-800'
-                            : component.quantity > 50
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : 'bg-red-100 text-red-800'
-                        }`}>
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            component.quantity > 100
+                              ? "bg-green-100 text-green-800"
+                              : component.quantity > 50
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
+                        >
                           {component.quantity}
                         </span>
                       </td>
@@ -432,7 +490,7 @@ const Components = () => {
                         {component.unit_price} جنيه
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {component.supplier || 'غير محدد'}
+                        {component.supplier || "غير محدد"}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <div className="flex space-x-2 space-x-reverse">
@@ -473,6 +531,23 @@ const Components = () => {
             </div>
           )}
         </div>
+
+        {/* Movements Table */}
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden my-12">
+          {/* <div className="px-6 py-4 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900">
+              سجل حركات المكونات
+            </h3>
+          </div> */}
+
+          {isMovementsLoading ? (
+            <div className="bg-white rounded-xl shadow-sm p-6 mb-6 text-center text-gray-500">
+              جاري تحميل سجل الحركات...
+            </div>
+          ) : (
+            <ComponentMovements movements={movementsData || []} />
+          )}
+        </div>
       </main>
 
       {/* Add/Edit Modal */}
@@ -481,78 +556,107 @@ const Components = () => {
           <div className="bg-white rounded-xl max-w-md w-full max-h-screen overflow-y-auto">
             <div className="p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                {selectedComponent ? 'تعديل المكون' : 'إضافة مكون جديد'}
+                {selectedComponent ? "تعديل المكون" : "إضافة مكون جديد"}
               </h3>
 
-              <form onSubmit={selectedComponent ? handleUpdateComponent : handleAddComponent} className="space-y-4">
+              <form
+                onSubmit={
+                  selectedComponent ? handleUpdateComponent : handleAddComponent
+                }
+                className="space-y-4"
+              >
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">كود المكون</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    كود المكون
+                  </label>
                   <input
                     type="text"
                     required
                     value={formData.code}
-                    onChange={(e) => setFormData({...formData, code: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, code: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="مثال: CMP-001"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">اسم المكون</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    اسم المكون
+                  </label>
                   <input
                     type="text"
                     required
                     value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="مثال: مسمار حديدي"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">الكمية</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    الكمية
+                  </label>
                   <input
                     type="number"
                     required
                     min="0"
                     value={formData.quantity}
-                    onChange={(e) => setFormData({...formData, quantity: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, quantity: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="0"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">سعر الوحدة (جنيه)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    سعر الوحدة (جنيه)
+                  </label>
                   <input
                     type="number"
                     step="0.01"
                     required
                     min="0"
                     value={formData.unit_price}
-                    onChange={(e) => setFormData({...formData, unit_price: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, unit_price: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="0.00"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">المورد (اختياري)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    المورد (اختياري)
+                  </label>
                   <input
                     type="text"
                     value={formData.supplier}
-                    onChange={(e) => setFormData({...formData, supplier: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, supplier: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="اسم المورد"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">صورة المكون (اختياري)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    صورة المكون (اختياري)
+                  </label>
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={(e) => setFormData({...formData, image: e.target.files[0]})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, image: e.target.files[0] })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
@@ -560,9 +664,13 @@ const Components = () => {
                 <div className="flex space-x-3 space-x-reverse pt-4">
                   <button
                     type="submit"
-                    className={`flex-1 bg-gradient-to-r ${selectedComponent ? 'from-green-600 to-green-700' : 'from-blue-600 to-purple-600'} text-white py-2 px-4 rounded-lg hover:shadow-lg transition-all`}
+                    className={`flex-1 bg-gradient-to-r ${
+                      selectedComponent
+                        ? "from-green-600 to-green-700"
+                        : "from-blue-600 to-purple-600"
+                    } text-white py-2 px-4 rounded-lg hover:shadow-lg transition-all`}
                   >
-                    {selectedComponent ? 'تحديث المكون' : 'إضافة المكون'}
+                    {selectedComponent ? "تحديث المكون" : "إضافة المكون"}
                   </button>
                   <button
                     type="button"
@@ -593,24 +701,32 @@ const Components = () => {
 
               <form onSubmit={handleStockIn} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">الكمية المضافة</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    الكمية المضافة
+                  </label>
                   <input
                     type="number"
                     required
                     min="1"
                     value={stockData.quantity}
-                    onChange={(e) => setStockData({...stockData, quantity: e.target.value})}
+                    onChange={(e) =>
+                      setStockData({ ...stockData, quantity: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="0"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">سبب الإضافة (اختياري)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    سبب الإضافة (اختياري)
+                  </label>
                   <input
                     type="text"
                     value={stockData.reason}
-                    onChange={(e) => setStockData({...stockData, reason: e.target.value})}
+                    onChange={(e) =>
+                      setStockData({ ...stockData, reason: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="مثال: توريد جديد"
                   />
@@ -618,11 +734,16 @@ const Components = () => {
 
                 <div className="bg-gray-50 p-3 rounded-lg">
                   <p className="text-sm text-gray-600">
-                    الكمية الحالية: <span className="font-semibold">{selectedComponent?.quantity}</span>
+                    الكمية الحالية:{" "}
+                    <span className="font-semibold">
+                      {selectedComponent?.quantity}
+                    </span>
                   </p>
                   <p className="text-sm text-gray-600">
-                    الكمية بعد الإضافة: <span className="font-semibold text-green-600">
-                      {selectedComponent?.quantity + parseInt(stockData.quantity || 0)}
+                    الكمية بعد الإضافة:{" "}
+                    <span className="font-semibold text-green-600">
+                      {selectedComponent?.quantity +
+                        parseInt(stockData.quantity || 0)}
                     </span>
                   </p>
                 </div>
@@ -638,7 +759,7 @@ const Components = () => {
                     type="button"
                     onClick={() => {
                       setShowStockModal(false);
-                      setStockData({ quantity: '', reason: '' });
+                      setStockData({ quantity: "", reason: "" });
                       setSelectedComponent(null);
                     }}
                     className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition-colors"
