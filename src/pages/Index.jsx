@@ -11,6 +11,10 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
+import { toast } from "@/hooks/use-toast";
+import Cookies from "js-cookie";
+import { jwtDecode } from "jwt-decode";
+import EditUserModal from "../components/EditUserModal";
 
 // إضافة دالة لجلب الإحصائيات
 const fetchStats = async () => {
@@ -50,6 +54,54 @@ const fetchStats = async () => {
 
 const Index = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  const [showModal, setShowModal] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  // استخرج بيانات المستخدم من التوكن
+  const token = Cookies.get("token");
+  let user = null;
+  if (token) {
+    try {
+      user = jwtDecode(token);
+      console.log("Decoded user:", user);
+    } catch (e) {
+      console.error("Token decode error:", e);
+    }
+  }
+
+  // تسجيل الخروج
+  const handleLogout = () => {
+    Cookies.remove("token");
+    window.location.href = "/login";
+  };
+
+  // حفظ التعديل
+  const handleSaveUser = async ({ newUsername, newPassword }) => {
+    try {
+      await axios.put(`http://localhost:5000/api/user/update`, {
+        id: user?.id,
+        username: newUsername,
+        password: newPassword,
+      });
+      toast({
+        title: "تم التحديث بنجاح",
+        description: "تم تحديث بيانات المستخدم بنجاح",
+        duration: 3000,
+        className: "bg-green-100 text-green-800",
+      });
+
+      // alert("تم تحديث المستخدم بنجاح");
+      setShowModal(false);
+    } catch (error) {
+      toast({
+        title: "خطأ في التحديث",
+        description: "حدث خطأ أثناء تحديث بيانات المستخدم",
+        variant: "destructive",
+        duration: 3000,
+      });
+    }
+  };
 
   // استخدام React Query لجلب الإحصائيات
   const { data: statsData, isLoading: statsLoading } = useQuery({
@@ -141,13 +193,13 @@ const Index = () => {
       icon: Factory,
       color: "from-purple-500 to-purple-600",
     },
-    {
-      title: "التقارير",
-      description: "عرض تقارير الإنتاج والمخزون",
-      link: "/reports",
-      icon: BarChart3,
-      color: "from-orange-500 to-orange-600",
-    },
+    // {
+    //   title: "التقارير",
+    //   description: "عرض تقارير الإنتاج والمخزون",
+    //   link: "/reports",
+    //   icon: BarChart3,
+    //   color: "from-orange-500 to-orange-600",
+    // },
   ];
 
   return (
@@ -171,6 +223,36 @@ const Index = () => {
               </div>
             </div>
             <div className="flex items-center space-x-4 space-x-reverse">
+              <div className="relative">
+                <button
+                  className="text-sm font-medium text-gray-700"
+                  onClick={() => setShowDropdown(!showDropdown)}
+                >
+                  الإعدادات ⚙️
+                </button>
+                {showDropdown && (
+                  <div className="absolute mt-2 bg-white shadow-md rounded-md text-right right-0 w-40 z-10">
+                    <button
+                      onClick={() => {
+                        setShowDropdown(false);
+                        setShowModal(true);
+                      }}
+                      className="block w-full text-right px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    >
+                      تعديل المستخدم
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowDropdown(false);
+                        handleLogout();
+                      }}
+                      className="block w-full text-right px-4 py-2 text-red-600 hover:bg-gray-100"
+                    >
+                      تسجيل الخروج
+                    </button>
+                  </div>
+                )}
+              </div>
               <div
                 className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
                   isOnline
@@ -276,7 +358,7 @@ const Index = () => {
         </div>
 
         {/* Recent Activity */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
+        {/* <div className="bg-white rounded-xl shadow-sm p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             النشاط الأخير
           </h3>
@@ -315,7 +397,13 @@ const Index = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
+        <EditUserModal
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          user={user}
+          onSave={handleSaveUser}
+        />
       </main>
     </div>
   );

@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,6 +9,10 @@ import Products from "./pages/Products";
 import Manufacturing from "./pages/Manufacturing";
 import Reports from "./pages/Reports";
 import NotFound from "./pages/NotFound";
+import Login from "./pages/Login";
+
+import ProtectedRoute from "./components/ProtectedRoute";
+import PublicRoute from "./components/PublicRoute";
 
 const queryClient = new QueryClient();
 
@@ -20,11 +23,56 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/components" element={<Components />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/manufacturing" element={<Manufacturing />} />
-          <Route path="/reports" element={<Reports />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Index />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/components"
+            element={
+              <ProtectedRoute>
+                <Components />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/products"
+            element={
+              <ProtectedRoute>
+                <Products />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/manufacturing"
+            element={
+              <ProtectedRoute>
+                <Manufacturing />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reports"
+            element={
+              <ProtectedRoute>
+                <Reports />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/login"
+            element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            }
+          />
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

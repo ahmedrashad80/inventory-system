@@ -40,6 +40,7 @@ const Components = () => {
     unit_price: "",
     supplier: "",
     image: null,
+    reason: "", // جديد
   });
   const [stockData, setStockData] = useState({
     quantity: "",
@@ -202,6 +203,7 @@ const Components = () => {
         quantity: parseInt(formData.quantity) || 0,
         unit_price: parseFloat(formData.unit_price) || 0,
         supplier: formData.supplier || "",
+        reason: formData.reason, // أضف السبب هنا
       };
 
       // If there's an image, use FormData instead
@@ -272,6 +274,7 @@ const Components = () => {
       unit_price: "",
       supplier: "",
       image: null,
+      reason: "", // جديد
     });
     setSelectedComponent(null);
   };
@@ -285,6 +288,7 @@ const Components = () => {
       unit_price: component.unit_price.toString(),
       supplier: component.supplier || "",
       image: null,
+      reason: "تعديل يدوي للمكون", // جديد
     });
     setShowEditModal(true);
   };
@@ -660,6 +664,24 @@ const Components = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
+
+                {selectedComponent && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      سبب التعديل <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.reason}
+                      onChange={(e) =>
+                        setFormData({ ...formData, reason: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="مثال: تصحيح بيانات أو تعديل كمية"
+                    />
+                  </div>
+                )}
 
                 <div className="flex space-x-3 space-x-reverse pt-4">
                   <button

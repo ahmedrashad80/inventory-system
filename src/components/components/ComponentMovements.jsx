@@ -129,8 +129,18 @@ const ComponentMovements = ({ movements }) => {
                     <td className="px-4 py-2 whitespace-nowrap">
                       {move.quantity}
                     </td>
-                    <td className="px-4 py-2 whitespace-nowrap">
-                      {move.reason || "-"}
+                    <td
+                      className="px-4 py-2 whitespace-nowrap"
+                      style={{
+                        maxWidth: 120,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        direction: "rtl",
+                      }}
+                    >
+                      {move.reason && move.reason.length > 30
+                        ? move.reason.slice(0, 30) + "..."
+                        : move.reason || "-"}
                     </td>
                     <td className="px-4 py-2 text-right" dir="rtl">
                       <button
@@ -156,7 +166,7 @@ const ComponentMovements = ({ movements }) => {
                       </button>
                     </td>
                   </tr>
-                  {expanded[move._id] && move.notes && (
+                  {expanded[move._id] && (move.notes || move.reason) && (
                     <tr>
                       <td
                         colSpan={8}
@@ -169,47 +179,58 @@ const ComponentMovements = ({ movements }) => {
                             wordBreak: "break-word",
                           }}
                         >
-                          <ul className="list-disc pr-4 space-y-1">
-                            {move.notes.split("|").map((note, idx) => {
-                              const cleanNote = note.trim();
-                              // يدعم وجود مسافة بعد أو قبل |
-                              const match = cleanNote.match(
-                                /^(\w+): من "(.*)" إلى "(.*)"$/
-                              );
-                              if (!match) {
-                                // fallback: عرض النص كما هو إذا لم يتطابق مع النمط
+                          {move.reason && (
+                            <div className="mb-2">
+                              <span className="font-semibold text-blue-900">
+                                سبب التعديل:
+                              </span>{" "}
+                              <span className="text-gray-700">
+                                {move.reason}
+                              </span>
+                            </div>
+                          )}
+                          {move.notes && (
+                            <ul className="list-disc pr-4 space-y-1">
+                              {move.notes.split("|").map((note, idx) => {
+                                const cleanNote = note.trim();
+                                const match = cleanNote.match(
+                                  /^(\w+): من "(.*)" إلى "(.*)"$/
+                                );
+                                if (!match) {
+                                  // fallback: عرض النص كما هو إذا لم يتطابق مع النمط
+                                  return (
+                                    <li key={idx} className="text-gray-700">
+                                      {cleanNote}
+                                    </li>
+                                  );
+                                }
+                                const [_, field, from, to] = match;
+                                const fieldLabels = {
+                                  name: "اسم المكون",
+                                  code: "الكود",
+                                  quantity: "الكمية",
+                                  unit_price: "سعر الوحدة",
+                                  supplier: "المورد",
+                                  image: "الصورة",
+                                };
                                 return (
-                                  <li key={idx} className="text-gray-700">
-                                    {cleanNote}
+                                  <li key={idx}>
+                                    <span className="font-semibold text-blue-900">
+                                      {fieldLabels[field] || field}:
+                                    </span>{" "}
+                                    <span className="text-gray-700">من</span>{" "}
+                                    <span className="text-red-700 font-mono">
+                                      {from}
+                                    </span>{" "}
+                                    <span className="text-gray-700">إلى</span>{" "}
+                                    <span className="text-green-700 font-mono">
+                                      {to}
+                                    </span>
                                   </li>
                                 );
-                              }
-                              const [_, field, from, to] = match;
-                              const fieldLabels = {
-                                name: "اسم المكون",
-                                code: "الكود",
-                                quantity: "الكمية",
-                                unit_price: "سعر الوحدة",
-                                supplier: "المورد",
-                                image: "الصورة",
-                              };
-                              return (
-                                <li key={idx}>
-                                  <span className="font-semibold text-blue-900">
-                                    {fieldLabels[field] || field}:
-                                  </span>{" "}
-                                  <span className="text-gray-700">من</span>{" "}
-                                  <span className="text-red-700 font-mono">
-                                    {from}
-                                  </span>{" "}
-                                  <span className="text-gray-700">إلى</span>{" "}
-                                  <span className="text-green-700 font-mono">
-                                    {to}
-                                  </span>
-                                </li>
-                              );
-                            })}
-                          </ul>
+                              })}
+                            </ul>
+                          )}
                         </div>
                       </td>
                     </tr>
