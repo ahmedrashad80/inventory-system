@@ -94,7 +94,7 @@ const Index = () => {
         }
       );
       console.log(data);
-      // user = data.user;
+      const user = data.user;
 
       await axios.put(`${import.meta.env.VITE_API_URL}api/user/update`, {
         id: user?.id,
@@ -114,9 +114,7 @@ const Index = () => {
     } catch (error) {
       toast({
         title: "خطأ في التحديث",
-        description:
-          error.response?.data?.message ||
-          "حدث خطأ أثناء تحديث بيانات المستخدم",
+        description: error || "حدث خطأ أثناء تحديث بيانات المستخدم",
         variant: "destructive",
         duration: 3000,
       });
