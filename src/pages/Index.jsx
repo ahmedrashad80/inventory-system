@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Package,
   Boxes,
@@ -56,7 +56,7 @@ const fetchStats = async () => {
 
 const Index = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
-
+  const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
 
@@ -73,9 +73,15 @@ const Index = () => {
   }
 
   // تسجيل الخروج
-  const handleLogout = () => {
-    Cookies.remove("token");
-    window.location.href = "/login";
+  const handleLogout = async () => {
+    await axios.post(
+      `${import.meta.env.VITE_API_URL}api/user/logout`,
+      {},
+      {
+        withCredentials: true,
+      }
+    );
+    navigate("/login");
   };
 
   // حفظ التعديل
