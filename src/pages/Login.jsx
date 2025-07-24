@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { User, Lock } from "lucide-react";
+import axios from "axios";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -13,32 +14,33 @@ const Login = () => {
     setError("");
 
     try {
-      const response = await fetch(
-        ` ${import.meta.env.VITE_API_URL}api/user/login`,
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}api/user/login`,
         {
-          method: "POST",
-          credentials: "include", // مهم لتخزين الكوكيز
+          username,
+          password,
+        },
+        {
+          withCredentials: true, // مهم جدًا للسماح بإرسال واستقبال الكوكيز
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ username, password }),
         }
       );
 
-      const data = await response.json();
-
-      if (response.ok) {
-        navigate("/"); // أو أي صفحة بعد الدخول
-      } else {
-        console.log("Login failed:", data);
-        setError(data.message || "فشل تسجيل الدخول");
+      // لو تم تسجيل الدخول بنجاح
+      if (response.status === 200) {
+        navigate("/"); // الانتقال بعد تسجيل الدخول
       }
     } catch (err) {
       console.log("Login error:", err);
-      setError(err.message);
+      if (err.response && err.response.data) {
+        setError(err.response.data.message || "فشل تسجيل الدخول");
+      } else {
+        setError("حدث خطأ أثناء تسجيل الدخول");
+      }
     }
   };
-
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
       <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
