@@ -94,6 +94,7 @@ const Index = () => {
         }
       );
       console.log(data);
+      console.log(data.user);
       const user = data.user;
 
       await axios.put(`${import.meta.env.VITE_API_URL}api/user/update`, {
@@ -419,7 +420,7 @@ const Index = () => {
         <EditUserModal
           isOpen={showModal}
           onClose={() => setShowModal(false)}
-          user={user}
+          // user={user}
           onSave={handleSaveUser}
         />
       </main>

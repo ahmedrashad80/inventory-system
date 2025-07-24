@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const EditUserModal = ({ isOpen, onClose, user, onSave }) => {
+const EditUserModal = ({ isOpen, onClose, onSave }) => {
   const [newUsername, setNewUsername] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
