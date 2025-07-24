@@ -62,7 +62,6 @@ const Index = () => {
 
   // استخرج بيانات المستخدم من التوكن
   const token = Cookies.get("token");
-  console.log("Index token:", token);
   let user = null;
   if (token) {
     try {
