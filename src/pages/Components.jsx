@@ -52,7 +52,7 @@ const Components = () => {
 
     queryFn: async () => {
       const response = await axios.get(
-        "http://localhost:5000/api/components/movements"
+        `${import.meta.env.VITE_API_URL}api/components/movements`
       );
       return response.data.movements;
     },

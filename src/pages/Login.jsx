@@ -13,14 +13,17 @@ const Login = () => {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/user/login", {
-        method: "POST",
-        credentials: "include", // مهم لتخزين الكوكيز
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }),
-      });
+      const response = await fetch(
+        ` ${import.meta.env.VITE_API_URL}api/user/login`,
+        {
+          method: "POST",
+          credentials: "include", // مهم لتخزين الكوكيز
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, password }),
+        }
+      );
 
       const data = await response.json();
 

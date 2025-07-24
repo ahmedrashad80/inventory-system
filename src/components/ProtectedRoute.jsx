@@ -3,7 +3,7 @@ import Cookies from "js-cookie";
 
 const ProtectedRoute = ({ children }) => {
   const token = Cookies.get("token");
-  console.log("ProtectedRoute token:", token);
+  // console.log("ProtectedRoute token:", token);
 
   if (!token) {
     return <Navigate to="/login" replace />;

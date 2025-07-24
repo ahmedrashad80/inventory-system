@@ -115,7 +115,7 @@ const ManufacturingResult = ({
     const labelsHtmlArr = await Promise.all(
       units.map(async (unit, idx) => {
         const qrDataUrl = await QRCode.toDataURL(
-          `https://localhost:5000/api/product/${unit.serialNumber}`,
+          `${import.meta.env.VITE_API_URL}api/product/${unit.serialNumber}`,
           { width: 54, margin: 0 }
         );
         // الفاصل قبل كل استيكر ما عدا الأول

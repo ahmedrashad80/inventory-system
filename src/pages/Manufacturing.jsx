@@ -61,7 +61,7 @@ const Manufacturing = () => {
     try {
       setIsLoadingRecords(true);
       const response = await axios.get(
-        "http://localhost:5000/api/products/manufacture"
+        `${import.meta.env.VITE_API_URL}api/products/manufacture`
       );
       setManufacturingRecords(
         Array.isArray(response.data) ? response.data : []
@@ -161,9 +161,9 @@ const Manufacturing = () => {
     setIsManufacturing(true);
 
     try {
-      const API_URL = "http://localhost:5000/api";
+      const API_URL = import.meta.env.VITE_API_URL;
       // Include the product ID in the request payload
-      const response = await axios.post(`${API_URL}/products/manufacture`, {
+      const response = await axios.post(`${API_URL}api/products/manufacture`, {
         ...manufactureData,
         productId: selectedProduct._id, // Ensure product ID is included
       });
@@ -222,9 +222,9 @@ const Manufacturing = () => {
       // If not expanded, fetch serial numbers first
       try {
         if (!serialNumbers[recordId]) {
-          const API_URL = "http://localhost:5000/api";
+          const API_URL = import.meta.env.VITE_API_URL;
           const response = await axios.get(
-            `${API_URL}/products/units/batch/${recordId}`
+            `${API_URL}api/products/units/batch/${recordId}`
           );
 
           // Update to use the units array from the response

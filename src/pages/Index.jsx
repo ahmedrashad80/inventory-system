@@ -21,14 +21,16 @@ const fetchStats = async () => {
   try {
     // يمكنك إنشاء نقطة نهاية مخصصة للإحصائيات أو استخدام عدة طلبات
     const componentsRes = await axios.get(
-      "http://localhost:5000/api/components"
+      `${import.meta.env.VITE_API_URL}api/components`
     );
-    const productsRes = await axios.get("http://localhost:5000/api/products");
+    const productsRes = await axios.get(
+      `${import.meta.env.VITE_API_URL}api/products`
+    );
     const manufacturingRes = await axios.get(
-      "http://localhost:5000/api/products/manufacture"
+      `${import.meta.env.VITE_API_URL}api/products/manufacture`
     ); // افتراضي، قد تحتاج لتعديله
     const allProductUnits = await axios.get(
-      "http://localhost:5000/api/products/units"
+      `${import.meta.env.VITE_API_URL}api/products/units`
     );
 
     console.log(componentsRes.data);
@@ -64,7 +66,7 @@ const Index = () => {
   if (token) {
     try {
       user = jwtDecode(token);
-      console.log("Decoded user:", user);
+      // console.log("Decoded user:", user);
     } catch (e) {
       console.error("Token decode error:", e);
     }
@@ -79,11 +81,12 @@ const Index = () => {
   // حفظ التعديل
   const handleSaveUser = async ({ newUsername, newPassword }) => {
     try {
-      await axios.put(`http://localhost:5000/api/user/update`, {
+      await axios.put(`${import.meta.env.VITE_API_URL}api/user/update`, {
         id: user?.id,
         username: newUsername,
         password: newPassword,
       });
+
       toast({
         title: "تم التحديث بنجاح",
         description: "تم تحديث بيانات المستخدم بنجاح",
