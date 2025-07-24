@@ -94,7 +94,7 @@ const Index = () => {
         }
       );
       console.log(data);
-      user = data.user;
+      // user = data.user;
 
       await axios.put(`${import.meta.env.VITE_API_URL}api/user/update`, {
         id: user?.id,
