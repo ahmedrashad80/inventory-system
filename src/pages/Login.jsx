@@ -28,12 +28,13 @@ const Login = () => {
         }
       );
 
+      console.log(response);
       if (response.ok) {
         console.log("Login successful:", response.data);
         navigate("/");
       } else {
         console.log("Login failed:", response.data);
-        setError(data.message || "فشل تسجيل الدخول");
+        setError(response.data.message || "فشل تسجيل الدخول");
       }
     } catch (err) {
       console.log("Login error:", err);
