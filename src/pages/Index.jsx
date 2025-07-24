@@ -93,7 +93,7 @@ const Index = () => {
           withCredentials: true,
         }
       );
-
+      console.log(data);
       user = data.user;
 
       await axios.put(`${import.meta.env.VITE_API_URL}api/user/update`, {
