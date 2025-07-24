@@ -29,10 +29,10 @@ const Login = () => {
       );
 
       if (response.ok) {
-        console.log("Login successful:", data);
+        console.log("Login successful:", response.data);
         navigate("/");
       } else {
-        console.log("Login failed:", data);
+        console.log("Login failed:", response.data);
         setError(data.message || "فشل تسجيل الدخول");
       }
     } catch (err) {
