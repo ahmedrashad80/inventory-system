@@ -66,7 +66,7 @@ const Index = () => {
   if (token) {
     try {
       user = jwtDecode(token);
-      // console.log("Decoded user:", user);
+      console.log("Decoded user:", user);
     } catch (e) {
       console.error("Token decode error:", e);
     }
