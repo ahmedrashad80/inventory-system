@@ -21,17 +21,16 @@ const Login = () => {
           password,
         },
         {
-          withCredentials: true, // مهم جدًا للسماح بإرسال واستقبال الكوكيز
+          withCredentials: true,
           headers: {
             "Content-Type": "application/json",
           },
         }
       );
 
-      // لو تم تسجيل الدخول بنجاح
-      if (response.status === 200) {
-        navigate("/"); // الانتقال بعد تسجيل الدخول
-      }
+      // if (response.status === 200) {
+      navigate("/");
+      // }
     } catch (err) {
       console.log("Login error:", err);
       if (err.response && err.response.data) {
