@@ -61,16 +61,16 @@ const Index = () => {
   const [showDropdown, setShowDropdown] = useState(false);
 
   // استخرج بيانات المستخدم من التوكن
-  const token = Cookies.get("token");
-  let user = null;
-  if (token) {
-    try {
-      user = jwtDecode(token);
-      console.log("Decoded user:", user);
-    } catch (e) {
-      console.error("Token decode error:", e);
-    }
-  }
+  // const token = Cookies.get("token");
+  // let user = null;
+  // if (token) {
+  //   try {
+  //     user = jwtDecode(token);
+  //     console.log("Decoded user:", user);
+  //   } catch (e) {
+  //     console.error("Token decode error:", e);
+  //   }
+  // }
 
   // تسجيل الخروج
   const handleLogout = async () => {
@@ -87,6 +87,15 @@ const Index = () => {
   // حفظ التعديل
   const handleSaveUser = async ({ newUsername, newPassword }) => {
     try {
+      const { data } = await axios.get(
+        `${import.meta.env.VITE_API_URL}api/user/verify`,
+        {
+          withCredentials: true,
+        }
+      );
+
+      user = data.user;
+
       await axios.put(`${import.meta.env.VITE_API_URL}api/user/update`, {
         id: user?.id,
         username: newUsername,
