@@ -114,7 +114,9 @@ const Index = () => {
     } catch (error) {
       toast({
         title: "خطأ في التحديث",
-        description: "حدث خطأ أثناء تحديث بيانات المستخدم",
+        description:
+          error.response?.data?.message ||
+          "حدث خطأ أثناء تحديث بيانات المستخدم",
         variant: "destructive",
         duration: 3000,
       });
