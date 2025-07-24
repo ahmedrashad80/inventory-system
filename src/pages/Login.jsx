@@ -28,9 +28,9 @@ const Login = () => {
         }
       );
 
-      // if (response.status === 200) {
-      navigate("/");
-      // }
+      if (response.status === 200) {
+        navigate("/");
+      }
     } catch (err) {
       console.log("Login error:", err);
       if (err.response && err.response.data) {
