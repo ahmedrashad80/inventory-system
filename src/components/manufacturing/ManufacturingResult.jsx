@@ -130,7 +130,7 @@ const ManufacturingResult = ({
 
         // Barcode text = company name + date (e.g., "BM_2025-07-26")
 
-        const barcodeText = `شركه BM للادوات المنزليه <br>${
+        const barcodeText = `شركه BM للادوات المنزليه  - ${
           new Date().toISOString().split("T")[0]
         }`;
 
