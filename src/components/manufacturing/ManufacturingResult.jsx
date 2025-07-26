@@ -129,8 +129,10 @@ const ManufacturingResult = ({
         );
 
         // Barcode text = company name + date (e.g., "BM_2025-07-26")
-        const barcodeText = `BM_${new Date().toISOString().split("T")[0]}`;
-        // can make width of barcode 2cm
+
+        const barcodeText = `شركه BM للادوات المنزليه <br>${
+          new Date().toISOString().split("T")[0]
+        }`;
 
         // Create barcode as data URL
         const canvas = document.createElement("canvas");
