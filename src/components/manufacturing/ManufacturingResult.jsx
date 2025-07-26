@@ -128,9 +128,7 @@ const ManufacturingResult = ({
           { width: 54, margin: 0 }
         );
 
-        // Barcode text = company name + date (e.g., "BM_2025-07-26")
-
-        const barcodeText = `BM Company – Home & Kitchen Tools - ${
+        const barcodeText = `BM Company - Home and Kitchen Tools - ${
           new Date().toISOString().split("T")[0]
         }`;
 
