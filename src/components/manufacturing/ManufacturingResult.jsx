@@ -11,6 +11,7 @@ import {
   Calendar,
   Factory,
 } from "lucide-react";
+import JsBarcode from "jsbarcode";
 import ProductLabel from "./ProductLabel";
 
 const ManufacturingResult = ({
@@ -111,13 +112,36 @@ const ManufacturingResult = ({
 
   // دالة طباعة كل الاستيكرات مع QR لكل واحد
   const handlePrintAllLabels = async () => {
-    const units = manufacturingResult.manufacturedUnits;
+    let units = manufacturingResult.manufacturedUnits;
+    // i want to duble number of units to print the qr code twice
+    units = [
+      ...manufacturingResult.manufacturedUnits,
+      ...manufacturingResult.manufacturedUnits,
+    ];
+
+    console.log(units);
+
     const labelsHtmlArr = await Promise.all(
       units.map(async (unit, idx) => {
         const qrDataUrl = await QRCode.toDataURL(
           `${import.meta.env.VITE_API_URL}api/product/${unit.serialNumber}`,
           { width: 54, margin: 0 }
         );
+
+        // Barcode text = company name + date (e.g., "BM_2025-07-26")
+        const barcodeText = `BM_${new Date().toISOString().split("T")[0]}`;
+        // can make width of barcode 2cm
+
+        // Create barcode as data URL
+        const canvas = document.createElement("canvas");
+        JsBarcode(canvas, barcodeText, {
+          format: "CODE128",
+          displayValue: false,
+          height: 40,
+          margin: 0,
+          width: 1,
+        });
+        const barcodeDataUrl = canvas.toDataURL();
         // الفاصل قبل كل استيكر ما عدا الأول
         const pageBreak = idx > 0 ? "page-break-before: always;" : "";
         return `
@@ -137,8 +161,15 @@ const ManufacturingResult = ({
                   ).toLocaleDateString()
                 : ""
             }</div>
-            <div style="text-align:center;margin-top:8px;">
-              <img src="${qrDataUrl}" alt="QR" style="width:48px;height:48px;" />
+             <div style="display: flex; justify-content: space-between; gap:5px;">
+             <div style="margin-right: 8px; margin-left: 8px;">
+             <img src="${qrDataUrl}" alt="QR" style="width:48px;height:48px;" />
+             </div>
+             <div style="width: 20px;"></div>
+             <div>
+              <img src="${barcodeDataUrl}" alt="Barcode" style="height:40px;" />
+              </div>
+
             </div>
           </div>
         </div>

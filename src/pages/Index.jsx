@@ -124,10 +124,10 @@ const Index = () => {
     const handleOffline = () => setIsOnline(false);
     const checkConnection = async () => {
       try {
-        await fetch("//www.google.com/favicon.ico", {
-          mode: "no-cors",
-          cache: "no-store",
-        });
+        // await fetch("//www.google.com/favicon.ico", {
+        //   mode: "no-cors",
+        //   cache: "no-store",
+        // });
         setIsOnline(true);
       } catch (err) {
         setIsOnline(false);
