@@ -1,6 +1,5 @@
-
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import {
   Boxes,
   Plus,
@@ -13,25 +12,26 @@ import {
   Eye,
   Upload,
   Download,
-  X
-} from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
-import { useProducts } from '@/hooks/useProducts';
-import { useComponents } from '@/hooks/useComponents';
+  X,
+} from "lucide-react";
+import { toast } from "@/hooks/use-toast";
+import { useProducts } from "@/hooks/useProducts";
+import { useComponents } from "@/hooks/useComponents";
 
 const Products = () => {
-  const { products, isLoading, addProduct, updateProduct, deleteProduct } = useProducts();
+  const { products, isLoading, addProduct, updateProduct, deleteProduct } =
+    useProducts();
   const { components } = useComponents();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [formData, setFormData] = useState({
-    code: '',
-    name: '',
-    description: '',
+    code: "",
+    name: "",
+    description: "",
     components: [],
-    image: null
+    image: null,
   });
 
   const handleSubmit = async (e) => {
@@ -51,8 +51,9 @@ const Products = () => {
       const productData = {
         code: formData.code,
         name: formData.name,
+        price: formData.price || 0,
         description: formData.description || "",
-        components: formData.components || []
+        components: formData.components || [],
       };
 
       // If there's an image, use FormData instead
@@ -60,8 +61,8 @@ const Products = () => {
         const formDataToSend = new FormData();
 
         // Add all form fields to FormData
-        Object.keys(productData).forEach(key => {
-          if (key === 'components') {
+        Object.keys(productData).forEach((key) => {
+          if (key === "components") {
             formDataToSend.append(key, JSON.stringify(productData[key]));
           } else {
             formDataToSend.append(key, productData[key]);
@@ -69,12 +70,12 @@ const Products = () => {
         });
 
         // Add the image
-        formDataToSend.append('image', formData.image);
+        formDataToSend.append("image", formData.image);
 
         if (selectedProduct) {
           await updateProduct.mutateAsync({
             id: selectedProduct._id,
-            data: formDataToSend
+            data: formDataToSend,
           });
         } else {
           await addProduct.mutateAsync(formDataToSend);
@@ -84,7 +85,7 @@ const Products = () => {
         if (selectedProduct) {
           await updateProduct.mutateAsync({
             id: selectedProduct._id,
-            data: productData
+            data: productData,
           });
         } else {
           await addProduct.mutateAsync(productData);
@@ -93,14 +94,16 @@ const Products = () => {
 
       toast({
         title: "تم بنجاح",
-        description: selectedProduct ? "تم تحديث المنتج بنجاح" : "تم إضافة المنتج بنجاح",
+        description: selectedProduct
+          ? "تم تحديث المنتج بنجاح"
+          : "تم إضافة المنتج بنجاح",
       });
 
       resetForm();
       setShowAddModal(false);
       setShowEditModal(false);
     } catch (error) {
-      console.error('Error saving product:', error);
+      console.error("Error saving product:", error);
       toast({
         title: "خطأ",
         description: error.response?.data?.message || "فشل في حفظ المنتج",
@@ -110,7 +113,7 @@ const Products = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
+    if (window.confirm("هل أنت متأكد من حذف هذا المنتج؟")) {
       try {
         await deleteProduct.mutateAsync(id);
         toast({
@@ -118,7 +121,7 @@ const Products = () => {
           description: "تم حذف المنتج بنجاح",
         });
       } catch (error) {
-        console.error('Error deleting product:', error);
+        console.error("Error deleting product:", error);
         toast({
           title: "خطأ",
           description: "فشل في حذف المنتج",
@@ -130,11 +133,11 @@ const Products = () => {
 
   const resetForm = () => {
     setFormData({
-      code: '',
-      name: '',
-      description: '',
+      code: "",
+      name: "",
+      description: "",
       components: [],
-      image: null
+      image: null,
     });
     setSelectedProduct(null);
   };
@@ -144,13 +147,14 @@ const Products = () => {
     setFormData({
       code: product.code,
       name: product.name,
-      description: product.description || '',
-      components: product.components?.map(comp => ({
-        component: comp.component?._id || comp.component,
-        componentName: comp.componentName || (comp.component?.name || ''),
-        quantity_required: comp.quantity_required
-      })) || [],
-      image: null
+      description: product.description || "",
+      components:
+        product.components?.map((comp) => ({
+          component: comp.component?._id || comp.component,
+          componentName: comp.componentName || comp.component?.name || "",
+          quantity_required: comp.quantity_required,
+        })) || [],
+      image: null,
     });
     setShowEditModal(true);
   };
@@ -158,7 +162,10 @@ const Products = () => {
   const addComponent = () => {
     setFormData({
       ...formData,
-      components: [...formData.components, { component: '', quantity_required: 1 }]
+      components: [
+        ...formData.components,
+        { component: "", quantity_required: 1 },
+      ],
     });
   };
 
@@ -169,12 +176,12 @@ const Products = () => {
 
   const updateComponent = (index, field, value) => {
     const newComponents = [...formData.components];
-    if (field === 'component') {
-      const selectedComp = components.find(c => c._id === value);
+    if (field === "component") {
+      const selectedComp = components.find((c) => c._id === value);
       newComponents[index] = {
         ...newComponents[index],
         component: value,
-        componentName: selectedComp ? selectedComp.name : ''
+        componentName: selectedComp ? selectedComp.name : "",
       };
     } else {
       newComponents[index][field] = value;
@@ -182,19 +189,27 @@ const Products = () => {
     setFormData({ ...formData, components: newComponents });
   };
 
-  const filteredProducts = products?.filter(product =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.code.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const filteredProducts =
+    products?.filter(
+      (product) =>
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.code.toLowerCase().includes(searchTerm.toLowerCase())
+    ) || [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100" dir="rtl">
+    <div
+      className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100"
+      dir="rtl"
+    >
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4 space-x-reverse">
-              <Link to="/" className="flex items-center text-gray-600 hover:text-gray-900 transition-colors">
+              <Link
+                to="/"
+                className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+              >
                 <ArrowLeft className="h-5 w-5 ml-2" />
                 العودة للرئيسية
               </Link>
@@ -204,8 +219,12 @@ const Products = () => {
                   <Boxes className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900">إدارة المنتجات</h1>
-                  <p className="text-sm text-gray-600">عرض وإدارة المنتجات النهائية</p>
+                  <h1 className="text-xl font-bold text-gray-900">
+                    إدارة المنتجات
+                  </h1>
+                  <p className="text-sm text-gray-600">
+                    عرض وإدارة المنتجات النهائية
+                  </p>
                 </div>
               </div>
             </div>
@@ -257,7 +276,9 @@ const Products = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 mb-1">إجمالي المنتجات</p>
-                <p className="text-2xl font-bold text-gray-900">{products?.length || 0}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {products?.length || 0}
+                </p>
               </div>
               <div className="bg-green-100 p-3 rounded-lg">
                 <Boxes className="h-6 w-6 text-green-600" />
@@ -268,7 +289,9 @@ const Products = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 mb-1">المنتجات النشطة</p>
-                <p className="text-2xl font-bold text-gray-900">{products?.length || 0}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {products?.length || 0}
+                </p>
               </div>
               <div className="bg-blue-100 p-3 rounded-lg">
                 <Package className="h-6 w-6 text-blue-600" />
@@ -280,7 +303,10 @@ const Products = () => {
               <div>
                 <p className="text-sm text-gray-600 mb-1">المكونات المستخدمة</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {products?.reduce((sum, prod) => sum + (prod.components?.length || 0), 0) || 0}
+                  {products?.reduce(
+                    (sum, prod) => sum + (prod.components?.length || 0),
+                    0
+                  ) || 0}
                 </p>
               </div>
               <div className="bg-purple-100 p-3 rounded-lg">
@@ -304,12 +330,17 @@ const Products = () => {
             </div>
           ) : (
             filteredProducts.map((product) => (
-              <div key={product._id} className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
+              <div
+                key={product._id}
+                className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow"
+              >
                 <div className="p-6">
                   {/* Product Header */}
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-1">{product.name}</h3>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                        {product.name}
+                      </h3>
                       <p className="text-sm text-gray-500">{product.code}</p>
                     </div>
                     <div className="flex space-x-1 space-x-reverse">
@@ -332,30 +363,55 @@ const Products = () => {
 
                   {/* Product Description */}
                   {product.description && (
-                    <p className="text-sm text-gray-600 mb-4">{product.description}</p>
+                    <p className="text-sm text-gray-600 mb-4">
+                      {product.description}
+                    </p>
                   )}
+                  {/* Product price */}
+                  <div className="text-sm text-gray-700 mb-4">
+                    <span className="font-medium">السعر:</span>{" "}
+                    {product.price ? (
+                      <span className="text-green-600">
+                        {product.price} جنيه
+                      </span>
+                    ) : (
+                      <span className="text-red-600">غير محدد</span>
+                    )}
+                  </div>
 
                   {/* Components List */}
                   <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-gray-700">المكونات المطلوبة:</h4>
+                    <h4 className="text-sm font-medium text-gray-700">
+                      المكونات المطلوبة:
+                    </h4>
                     {product.components && product.components.length > 0 ? (
                       <div className="space-y-1">
                         {product.components.map((comp, index) => (
-                          <div key={index} className="flex items-center justify-between text-xs bg-gray-50 rounded px-2 py-1">
-                            <span className="text-gray-700">{comp.component?.name || comp.componentName}</span>
-                            <span className="font-medium text-gray-900">{comp.quantity_required}</span>
+                          <div
+                            key={index}
+                            className="flex items-center justify-between text-xs bg-gray-50 rounded px-2 py-1"
+                          >
+                            <span className="text-gray-700">
+                              {comp.component?.name || comp.componentName}
+                            </span>
+                            <span className="font-medium text-gray-900">
+                              {comp.quantity_required}
+                            </span>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <p className="text-xs text-gray-500">لا توجد مكونات محددة</p>
+                      <p className="text-xs text-gray-500">
+                        لا توجد مكونات محددة
+                      </p>
                     )}
                   </div>
 
                   {/* Product Footer */}
                   <div className="mt-4 pt-4 border-t border-gray-200 flex items-center justify-between">
                     <span className="text-xs text-gray-500">
-                      تم الإنشاء: {new Date(product.createdAt).toLocaleDateString('ar')}
+                      تم الإنشاء:{" "}
+                      {new Date(product.createdAt).toLocaleDateString("ar")}
                     </span>
                     <Link
                       to="/manufacturing"
@@ -378,41 +434,71 @@ const Products = () => {
           <div className="bg-white rounded-xl max-w-2xl w-full max-h-screen overflow-y-auto">
             <div className="p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                {selectedProduct ? 'تعديل المنتج' : 'إضافة منتج جديد'}
+                {selectedProduct ? "تعديل المنتج" : "إضافة منتج جديد"}
               </h3>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">كود المنتج</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      كود المنتج
+                    </label>
                     <input
                       type="text"
                       required
                       value={formData.code}
-                      onChange={(e) => setFormData({...formData, code: e.target.value})}
+                      onChange={(e) =>
+                        setFormData({ ...formData, code: e.target.value })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       placeholder="مثال: PRD-001"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">اسم المنتج</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      اسم المنتج
+                    </label>
                     <input
                       type="text"
                       required
                       value={formData.name}
-                      onChange={(e) => setFormData({...formData, name: e.target.value})}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       placeholder="مثال: كرسي مكتبي"
                     />
                   </div>
                 </div>
+                {/* price */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      سعر المنتج
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      value={formData.price}
+                      onChange={(e) =>
+                        setFormData({ ...formData, price: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="مثال: 100"
+                    />
+                  </div>
+                </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">الوصف (اختياري)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    الوصف (اختياري)
+                  </label>
                   <textarea
                     value={formData.description}
-                    onChange={(e) => setFormData({...formData, description: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     rows="3"
                     placeholder="وصف المنتج..."
@@ -420,11 +506,15 @@ const Products = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">صورة المنتج (اختياري)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    صورة المنتج (اختياري)
+                  </label>
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={(e) => setFormData({...formData, image: e.target.files[0]})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, image: e.target.files[0] })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   />
                 </div>
@@ -432,7 +522,9 @@ const Products = () => {
                 {/* Components Section */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="block text-sm font-medium text-gray-700">المكونات المطلوبة</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      المكونات المطلوبة
+                    </label>
                     <button
                       type="button"
                       onClick={addComponent}
@@ -446,10 +538,15 @@ const Products = () => {
                   {/* Components Section in the form */}
                   <div className="space-y-2 max-h-60 overflow-y-auto">
                     {formData.components.map((component, index) => (
-                      <div key={index} className="flex items-center space-x-2 space-x-reverse p-3 bg-gray-50 rounded-lg">
+                      <div
+                        key={index}
+                        className="flex items-center space-x-2 space-x-reverse p-3 bg-gray-50 rounded-lg"
+                      >
                         <select
-                          value={component.component || ''}
-                          onChange={(e) => updateComponent(index, 'component', e.target.value)}
+                          value={component.component || ""}
+                          onChange={(e) =>
+                            updateComponent(index, "component", e.target.value)
+                          }
                           className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                           required
                         >
@@ -465,7 +562,13 @@ const Products = () => {
                           type="number"
                           min="1"
                           value={component.quantity_required}
-                          onChange={(e) => updateComponent(index, 'quantity_required', parseInt(e.target.value))}
+                          onChange={(e) =>
+                            updateComponent(
+                              index,
+                              "quantity_required",
+                              parseInt(e.target.value)
+                            )
+                          }
                           className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                           placeholder="الكمية"
                           required
@@ -492,9 +595,13 @@ const Products = () => {
                 <div className="flex space-x-3 space-x-reverse pt-4">
                   <button
                     type="submit"
-                    className={`flex-1 bg-gradient-to-r ${selectedProduct ? 'from-green-600 to-green-700' : 'from-green-600 to-green-700'} text-white py-2 px-4 rounded-lg hover:shadow-lg transition-all`}
+                    className={`flex-1 bg-gradient-to-r ${
+                      selectedProduct
+                        ? "from-green-600 to-green-700"
+                        : "from-green-600 to-green-700"
+                    } text-white py-2 px-4 rounded-lg hover:shadow-lg transition-all`}
                   >
-                    {selectedProduct ? 'تحديث المنتج' : 'إضافة المنتج'}
+                    {selectedProduct ? "تحديث المنتج" : "إضافة المنتج"}
                   </button>
                   <button
                     type="button"

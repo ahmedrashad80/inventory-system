@@ -28,13 +28,14 @@ const fetchStats = async () => {
     );
     const manufacturingRes = await axios.get(
       `${import.meta.env.VITE_API_URL}api/products/manufacture`
-    ); // افتراضي، قد تحتاج لتعديله
+    );
     const allProductUnits = await axios.get(
       `${import.meta.env.VITE_API_URL}api/products/units`
     );
 
     console.log(componentsRes.data);
     console.log(manufacturingRes.data);
+    console.log(allProductUnits.data);
     return {
       componentsCount: componentsRes.data.length || 0,
       productsCount: productsRes.data.length || 0,
@@ -59,18 +60,6 @@ const Index = () => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-
-  // استخرج بيانات المستخدم من التوكن
-  // const token = Cookies.get("token");
-  // let user = null;
-  // if (token) {
-  //   try {
-  //     user = jwtDecode(token);
-  //     console.log("Decoded user:", user);
-  //   } catch (e) {
-  //     console.error("Token decode error:", e);
-  //   }
-  // }
 
   // تسجيل الخروج
   const handleLogout = async () => {
@@ -219,6 +208,14 @@ const Index = () => {
     //   icon: BarChart3,
     //   color: "from-orange-500 to-orange-600",
     // },
+    // اداره المبيعات
+    {
+      title: "إدارة المبيعات",
+      description: "عرض وإدارة مبيعات المنتجات",
+      link: "/sales",
+      icon: BarChart3,
+      color: "from-orange-500 to-orange-600",
+    },
   ];
 
   return (

@@ -10,6 +10,7 @@ import Manufacturing from "./pages/Manufacturing";
 import Reports from "./pages/Reports";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
+import Sales from "./pages/Sales";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
@@ -55,6 +56,7 @@ const App = () => (
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/reports"
             element={
@@ -63,7 +65,14 @@ const App = () => (
               </ProtectedRoute>
             }
           />
-
+          <Route
+            path="/sales"
+            element={
+              <ProtectedRoute>
+                <Sales />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/login"
             element={
