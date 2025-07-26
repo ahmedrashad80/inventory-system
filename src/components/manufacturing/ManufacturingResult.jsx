@@ -128,7 +128,7 @@ const ManufacturingResult = ({
           { width: 54, margin: 0 }
         );
 
-        const barcodeText = `BM Company - Home and Kitchen Tools - ${
+        const barcodeText = `BM Company-Home Tools- ${
           new Date().toISOString().split("T")[0]
         }`;
 
