@@ -165,7 +165,7 @@ const ManufacturingResult = ({
              <div style="margin-right: 8px; margin-left: 8px;">
              <img src="${qrDataUrl}" alt="QR" style="width:48px;height:48px;" />
              </div>
-             <div style="width: 20px;"></div>
+             <div style="width: 5px;"></div>
              <div>
               <img src="${barcodeDataUrl}" alt="Barcode" style="height:40px;" />
               </div>
