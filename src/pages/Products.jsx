@@ -398,20 +398,6 @@ const Products = () => {
                     )}
                   </div>
 
-                  {/* Product Images */}
-                  {product.image && product.image.length > 0 && (
-                    <div className="flex space-x-2">
-                      {product.image.map((imageUrl, index) => (
-                        <img
-                          key={index}
-                          src={imageUrl}
-                          alt={`Product Image ${index + 1}`}
-                          className="w-20 h-20 object-cover rounded"
-                        />
-                      ))}
-                    </div>
-                  )}
-
                   {/* Product Footer */}
                   <div className="mt-4 pt-4 border-t border-gray-200 flex items-center justify-between">
                     <span className="text-xs text-gray-500">
