@@ -31,7 +31,7 @@ const Products = () => {
     name: "",
     description: "",
     components: [],
-    image: null,
+    image: [], // Changed to an array
   });
 
   const handleSubmit = async (e) => {
@@ -56,40 +56,31 @@ const Products = () => {
         components: formData.components || [],
       };
 
-      // If there's an image, use FormData instead
-      if (formData.image) {
-        const formDataToSend = new FormData();
+      const formDataToSend = new FormData();
 
-        // Add all form fields to FormData
-        Object.keys(productData).forEach((key) => {
-          if (key === "components") {
-            formDataToSend.append(key, JSON.stringify(productData[key]));
-          } else {
-            formDataToSend.append(key, productData[key]);
-          }
+      // Add all form fields to FormData
+      Object.keys(productData).forEach((key) => {
+        if (key === "components") {
+          formDataToSend.append(key, JSON.stringify(productData[key]));
+        } else {
+          formDataToSend.append(key, productData[key]);
+        }
+      });
+
+      // Append each image to FormData
+      if (formData.image && formData.image.length > 0) {
+        formData.image.forEach((image) => {
+          formDataToSend.append("image", image);
         });
+      }
 
-        // Add the image
-        formDataToSend.append("image", formData.image);
-
-        if (selectedProduct) {
-          await updateProduct.mutateAsync({
-            id: selectedProduct._id,
-            data: formDataToSend,
-          });
-        } else {
-          await addProduct.mutateAsync(formDataToSend);
-        }
+      if (selectedProduct) {
+        await updateProduct.mutateAsync({
+          id: selectedProduct._id,
+          data: formDataToSend,
+        });
       } else {
-        // No image, use JSON
-        if (selectedProduct) {
-          await updateProduct.mutateAsync({
-            id: selectedProduct._id,
-            data: productData,
-          });
-        } else {
-          await addProduct.mutateAsync(productData);
-        }
+        await addProduct.mutateAsync(formDataToSend);
       }
 
       toast({
@@ -154,7 +145,7 @@ const Products = () => {
           componentName: comp.componentName || comp.component?.name || "",
           quantity_required: comp.quantity_required,
         })) || [],
-      image: null,
+      image: product.image || [], // Set the image array
     });
     setShowEditModal(true);
   };
@@ -512,9 +503,11 @@ const Products = () => {
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={(e) =>
-                      setFormData({ ...formData, image: e.target.files[0] })
-                    }
+                    multiple // Allow multiple file selection
+                    onChange={(e) => {
+                      // Append selected files to the image array
+                      setFormData({ ...formData, image: [...e.target.files] });
+                    }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   />
                 </div>
