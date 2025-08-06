@@ -26,28 +26,25 @@ const Products = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  // تعديل حالة formData لتحتوي على مصفوفة واحدة للصور
   const [formData, setFormData] = useState({
     code: "",
     name: "",
     description: "",
+    price: "",
     components: [],
-    image: [], // Changed to an array
+    images: [], // مصفوفة واحدة لجميع الصور
   });
+  // في useState أضف حالة جديدة للصور القديمة
+  const [oldImages, setOldImages] = useState([]);
 
+  // تعديل دالة handleSubmit
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Ensure required fields are included
-      if (!formData.code || !formData.name) {
-        toast({
-          title: "خطأ",
-          description: "كود المنتج واسم المنتج مطلوبان",
-          variant: "destructive",
-        });
-        return;
-      }
+      const formDataToSend = new FormData();
 
-      // Create data object for JSON submission
+      // إضافة البيانات الأساسية
       const productData = {
         code: formData.code,
         name: formData.name,
@@ -56,9 +53,7 @@ const Products = () => {
         components: formData.components || [],
       };
 
-      const formDataToSend = new FormData();
-
-      // Add all form fields to FormData
+      // إضافة البيانات للFormData
       Object.keys(productData).forEach((key) => {
         if (key === "components") {
           formDataToSend.append(key, JSON.stringify(productData[key]));
@@ -67,12 +62,16 @@ const Products = () => {
         }
       });
 
-      // Append each image to FormData
-      if (formData.image && formData.image.length > 0) {
-        formData.image.forEach((image) => {
-          formDataToSend.append("image", image);
-        });
-      }
+      // إضافة جميع الصور
+      formData.images.forEach((img, index) => {
+        if (typeof img === "string") {
+          // إذا كانت الصورة URL
+          formDataToSend.append(`image`, img);
+        } else {
+          // إذا كانت الصورة ملف جديد
+          formDataToSend.append(`image`, img);
+        }
+      });
 
       if (selectedProduct) {
         await updateProduct.mutateAsync({
@@ -91,6 +90,7 @@ const Products = () => {
       });
 
       resetForm();
+      setOldImages([]); // إعادة تعيين الصور القديمة
       setShowAddModal(false);
       setShowEditModal(false);
     } catch (error) {
@@ -127,10 +127,12 @@ const Products = () => {
       code: "",
       name: "",
       description: "",
+      price: "",
       components: [],
-      image: null,
+      images: [], // تغيير من null إلى مصفوفة فارغة
     });
     setSelectedProduct(null);
+    setOldImages([]); // تأكد من إعادة تعيين الصور القديمة أيضاً
   };
 
   const openEditModal = (product) => {
@@ -138,6 +140,7 @@ const Products = () => {
     setFormData({
       code: product.code,
       name: product.name,
+      price: product.price || 0,
       description: product.description || "",
       components:
         product.components?.map((comp) => ({
@@ -145,7 +148,7 @@ const Products = () => {
           componentName: comp.componentName || comp.component?.name || "",
           quantity_required: comp.quantity_required,
         })) || [],
-      image: product.image || [], // Set the image array
+      images: product.image || [], // نضع الصور الموجودة
     });
     setShowEditModal(true);
   };
@@ -186,6 +189,34 @@ const Products = () => {
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         product.code.toLowerCase().includes(searchTerm.toLowerCase())
     ) || [];
+
+  // تعديل دالة handleImageChange
+  const handleImageChange = (e) => {
+    if (e.target.files?.length) {
+      const newImages = Array.from(e.target.files);
+      setFormData((prev) => {
+        const updatedImages = [...prev.images];
+        newImages.forEach((img) => {
+          if (updatedImages.length < 5) {
+            // التحقق من حد 5 صور
+            updatedImages.push(img);
+          }
+        });
+        return {
+          ...prev,
+          images: updatedImages,
+        };
+      });
+    }
+  };
+
+  // دالة لحذف أي صورة
+  const removeImage = (indexToRemove) => {
+    setFormData((prev) => ({
+      ...prev,
+      images: prev.images.filter((_, index) => index !== indexToRemove),
+    }));
+  };
 
   return (
     <div
@@ -398,6 +429,23 @@ const Products = () => {
                     )}
                   </div>
 
+                  {/* Product Image */}
+                  {product.image.length ? (
+                    // there is more than image in array
+                    <div className="mt-4">
+                      {product.image.map((img, index) => (
+                        <img
+                          key={index}
+                          src={img}
+                          alt={`${product.name}-${index + 1}`}
+                          className="w-full rounded-lg mb-2"
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    ""
+                  )}
+
                   {/* Product Footer */}
                   <div className="mt-4 pt-4 border-t border-gray-200 flex items-center justify-between">
                     <span className="text-xs text-gray-500">
@@ -498,18 +546,46 @@ const Products = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    صورة المنتج (اختياري)
+                    صور المنتج ({formData.images.length}/5)
                   </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple // Allow multiple file selection
-                    onChange={(e) => {
-                      // Append selected files to the image array
-                      setFormData({ ...formData, image: [...e.target.files] });
-                    }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  />
+
+                  {formData.images.length > 0 && (
+                    <div className="mb-4">
+                      <div className="flex flex-wrap gap-2">
+                        {formData.images.map((img, index) => (
+                          <div key={index} className="relative group">
+                            <img
+                              src={
+                                typeof img === "string"
+                                  ? img
+                                  : URL.createObjectURL(img)
+                              }
+                              alt={`صورة ${index + 1}`}
+                              className="w-20 h-20 object-cover rounded-lg border"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeImage(index)}
+                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              title="حذف الصورة"
+                            >
+                              <X className="w-4 w-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {formData.images.length < 5 && (
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleImageChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    />
+                  )}
                 </div>
 
                 {/* Components Section */}
