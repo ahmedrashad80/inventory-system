@@ -430,7 +430,7 @@ const Products = () => {
                   </div>
 
                   {/* Product Image */}
-                  {product.image.length ? (
+                  {/* {product.image.length ? (
                     // there is more than image in array
                     <div className="mt-4">
                       {product.image.map((img, index) => (
@@ -444,7 +444,7 @@ const Products = () => {
                     </div>
                   ) : (
                     ""
-                  )}
+                  )} */}
 
                   {/* Product Footer */}
                   <div className="mt-4 pt-4 border-t border-gray-200 flex items-center justify-between">
