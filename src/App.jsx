@@ -14,6 +14,7 @@ import Sales from "./pages/Sales";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
+import Orders from "./pages/Orders";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +71,14 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <Sales />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/orders"
+            element={
+              <ProtectedRoute>
+                <Orders />
               </ProtectedRoute>
             }
           />

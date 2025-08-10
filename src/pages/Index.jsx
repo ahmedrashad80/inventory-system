@@ -216,6 +216,13 @@ const Index = () => {
       icon: BarChart3,
       color: "from-orange-500 to-orange-600",
     },
+    {
+      title: "إدارة الطلبات",
+      description: "عرض وإدارة الطلبات الواردة",
+      link: "/orders",
+      icon: Package,
+      color: "from-red-500 to-red-600",
+    },
   ];
 
   return (

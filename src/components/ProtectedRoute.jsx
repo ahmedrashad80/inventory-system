@@ -5,6 +5,7 @@ import axios from "axios";
 const ProtectedRoute = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState("");
 
   useEffect(() => {
     axios
@@ -13,6 +14,8 @@ const ProtectedRoute = ({ children }) => {
       })
       .then((res) => {
         setAuthenticated(true);
+        console.log("User is authenticated:", res.data);
+        setUserRole(res.data.user.role);
       })
       .catch(() => {
         setAuthenticated(false);
@@ -25,6 +28,13 @@ const ProtectedRoute = ({ children }) => {
   if (loading) return null;
 
   if (!authenticated) return <Navigate to="/login" replace />;
+  // if (userRole === "admin") return <Navigate to="/orders" replace />;
+  if (userRole === "admin") {
+    const currentPath = window.location.pathname;
+    if (currentPath !== "/orders") {
+      return <Navigate to="/orders" replace />;
+    }
+  }
 
   return children;
 };
