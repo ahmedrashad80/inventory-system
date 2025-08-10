@@ -22,6 +22,7 @@ const OrdersList = ({
 
   const toggleExpand = (id) => {
     setExpandedOrderId(expandedOrderId === id ? null : id);
+    console.log(orders);
   };
 
   // Print invoice function
@@ -72,9 +73,7 @@ const OrdersList = ({
             <tr>
               <td colspan="3" style="border: 1px solid #ddd; padding: 8px; text-align: right;">الإجمالي</td>
               <td style="border: 1px solid #ddd; padding: 8px;">
-                ${order.products
-                  .reduce((sum, p) => sum + p.price * p.quantity, 0)
-                  .toFixed(2)} جنيه
+                ${order.totalPrice} جنيه
               </td>
             </tr>
           </tfoot>
@@ -198,11 +197,10 @@ const OrdersList = ({
                             <strong>المحافظة:</strong> {order.governorate}
                           </div>
                           <div>
-                            <strong>اجمالى السعر:</strong>{" "}
-                            {order.products.reduce(
-                              (a, b) => a + b.price * b.quantity,
-                              0
-                            )}
+                            <strong>الشحن:</strong> {order.shippingCost}
+                          </div>
+                          <div>
+                            <strong>اجمالى السعر:</strong> {order.totalPrice}
                           </div>
 
                           <div>

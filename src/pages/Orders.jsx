@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Package, Plus, Search, ArrowLeft } from "lucide-react";
+import EditShippingCostModal from "../components/shipping/EditShippingCostModal"; // import modal
 import axios from "axios";
 import { toast } from "@/hooks/use-toast";
 import { EGYPTIAN_GOVERNORATES } from "../constants/governorates";
@@ -20,6 +21,23 @@ const Orders = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+
+  const [showEditCostShipping, setShowEditCostShipping] = useState(false);
+  const [shippingGovernorates, setShippingGovernorates] = useState([]);
+  useEffect(() => {
+    if (showEditCostShipping) {
+      axios
+        .get(`${import.meta.env.VITE_API_URL}api/shipping`)
+        .then((res) => setShippingGovernorates(res.data))
+        .catch(() =>
+          toast({
+            title: "خطأ",
+            description: "فشل في جلب بيانات الشحن",
+            variant: "destructive",
+          })
+        );
+    }
+  }, [showEditCostShipping]);
 
   const [formData, setFormData] = useState({
     customerName: "",
@@ -317,6 +335,15 @@ const Orders = () => {
           </div>
           <button
             onClick={() => {
+              setShowEditCostShipping(true);
+            }}
+            className="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all flex items-center space-x-2 space-x-reverse"
+          >
+            <Plus className="h-4 w-4" />
+            <span>تعديل سعر الشحن</span>
+          </button>
+          {/* <button
+            onClick={() => {
               resetForm();
               setShowAddModal(true);
             }}
@@ -324,7 +351,7 @@ const Orders = () => {
           >
             <Plus className="h-4 w-4" />
             <span>إضافة طلب جديد</span>
-          </button>
+          </button> */}
         </div>
       </header>
 
@@ -332,6 +359,11 @@ const Orders = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Cards */}
         <StatsCards />
+        <EditShippingCostModal
+          show={showEditCostShipping}
+          onClose={() => setShowEditCostShipping(false)}
+          governorates={shippingGovernorates}
+        />
 
         <div className="relative max-w-md mt-4 my-6">
           <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
