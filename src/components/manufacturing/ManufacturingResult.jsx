@@ -112,25 +112,23 @@ const ManufacturingResult = ({
 
   // دالة طباعة كل الاستيكرات مع QR لكل واحد
   const handlePrintAllLabels = async () => {
-    let units = manufacturingResult.manufacturedUnits;
+    let units = manufacturingResult;
     // i want to duble number of units to print the qr code twice
     units = [
       ...manufacturingResult.manufacturedUnits,
       ...manufacturingResult.manufacturedUnits,
     ];
 
-    console.log(units);
-
     const labelsHtmlArr = await Promise.all(
       units.map(async (unit, idx) => {
+        console.log(unit);
+        console.log(manufacturingResult);
         const qrDataUrl = await QRCode.toDataURL(
-          `${import.meta.env.VITE_API_URL}api/product/${unit.serialNumber}`,
+          `https://bm-store-arabic.vercel.app/products/${manufacturingResult.productId}`,
           { width: 54, margin: 0 }
         );
 
-        const barcodeText = `BM Company-Home Tools- ${
-          new Date().toISOString().split("T")[0]
-        }`;
+        const barcodeText = `BM- ${new Date().toISOString().split("T")[0]}`;
 
         // Create barcode as data URL
         const canvas = document.createElement("canvas");
@@ -147,22 +145,12 @@ const ManufacturingResult = ({
         return `
         <div style="width:8cm;height:5cm;display:block ;box-sizing:border-box;margin:0;padding:2mm;overflow:hidden;${pageBreak}">
           <div style="border:1px solid #ccc; border-radius:6px; padding:8px; width:100%; height:100%; font-size:12px; direction:rtl; text-align:right; box-sizing:border-box;">
-            <div><strong>المنتج:</strong> ${
-              manufacturingResult.productName
-            }</div>
-            <div><strong>الدفعة:</strong> ${
-              manufacturingResult.batchNumber
-            }</div>
-            <div><strong>التسلسل:</strong> ${unit.serialNumber}</div>
-            <div><strong>التاريخ:</strong> ${
-              manufacturingResult.manufacturedAt
-                ? new Date(
-                    manufacturingResult.manufacturedAt
-                  ).toLocaleDateString()
-                : ""
-            }</div>
+
+
+            <div>${unit.serialNumber}</div>
+
              <div style="display: flex; justify-content: space-between; gap:5px;">
-             <div style="margin-right: 8px; margin-left: 8px;">
+             <div style="margin: 8px; margin-left: 8px;">
              <img src="${qrDataUrl}" alt="QR" style="width:48px;height:48px;" />
              </div>
              <div style="width: 5px;"></div>

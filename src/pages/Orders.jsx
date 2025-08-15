@@ -240,16 +240,24 @@ const Orders = () => {
 
   // Stats cards JSX (place inside <main> before OrdersList)
   const StatsCards = () => {
-    const totalOrders = orders.length;
+    const totalOrders = orders.filter(
+      (order) => order.status === "معلق"
+    ).length;
+    console.log(totalOrders);
+    console.log(orders);
     const totalProductsOrdered = orders.reduce(
       (sum, order) =>
-        sum + order.products.reduce((pSum, p) => pSum + p.quantity, 0),
+        order.status === "معلق"
+          ? sum + order.products.reduce((pSum, p) => pSum + p.quantity, 0)
+          : sum,
       0
     );
     const totalRevenue = orders.reduce(
       (sum, order) =>
-        sum +
-        order.products.reduce((pSum, p) => pSum + p.price * p.quantity, 0),
+        order.status === "تم الشحن"
+          ? sum +
+            order.products.reduce((pSum, p) => pSum + p.price * p.quantity, 0)
+          : sum,
       0
     );
 
@@ -258,7 +266,9 @@ const Orders = () => {
         <div className="bg-white rounded-xl shadow-sm p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 mb-1">إجمالي الطلبات</p>
+              <p className="text-sm text-gray-600 mb-1">
+                إجمالي الطلبات المعلقه
+              </p>
               <p className="text-2xl font-bold text-gray-900">{totalOrders}</p>
             </div>
             <div className="bg-red-100 p-3 rounded-lg">

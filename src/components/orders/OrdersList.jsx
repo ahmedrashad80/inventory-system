@@ -29,7 +29,10 @@ const OrdersList = ({
   const printInvoice = (order) => {
     const printContent = document.createElement("div");
     printContent.innerHTML = `
-      <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right; padding: 20px;">
+      <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right; padding: 20px; positon:relative">
+
+
+         <img src="/bm.png" alt="Logo" style="position: absolute; top: 1rem; left: 1rem; width: 100px; height: 100px; margin: 0;" />
        <h2 style="text-align: center; margin-bottom: 20px;">فاتورة البيع</h2>
         <p style="text-align: center; font-weight: bold; font-size: 1.2em;">شركة BM</p>
         <h3 style="text-align: center; margin-bottom: 20px;">فاتورة الطلب رقم ${
@@ -71,6 +74,12 @@ const OrdersList = ({
           </tbody>
           <tfoot>
             <tr>
+              <td colspan="3" style="border: 1px solid #ddd; padding: 8px; text-align: right;">تكلفه الشحن</td>
+              <td style="border: 1px solid #ddd; padding: 8px;">
+                ${order.shippingCost} جنيه
+              </td>
+            </tr>
+            <tr>
               <td colspan="3" style="border: 1px solid #ddd; padding: 8px; text-align: right;">الإجمالي</td>
               <td style="border: 1px solid #ddd; padding: 8px;">
                 ${order.totalPrice} جنيه
@@ -80,7 +89,7 @@ const OrdersList = ({
         </table>
         <p style="text-align: center; margin-top: 20px;">شكراً لتعاملكم معنا!</p>
           <p style="text-align: center; margin-top: 10px; font-size: 0.9em;">
-          رقم الاتصال: 0123456789
+          رقم الاتصال: 01091144077
         </p>
       </div>
     `;

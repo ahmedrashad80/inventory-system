@@ -171,6 +171,7 @@ const Manufacturing = () => {
       setManufacturingResult({
         batchNumber: response.data.batch_no,
         productName: selectedProduct.name,
+        productId: selectedProduct._id,
         quantity: parseInt(manufactureData.quantity),
         manufacturedUnits: response.data.units.map((unit, index) => ({
           serialNumber: unit.serial_number,
