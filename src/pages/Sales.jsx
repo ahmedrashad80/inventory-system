@@ -22,12 +22,14 @@ import { toast } from "sonner";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Boxes, Sparkles } from "lucide-react";
+import WholesaleSaleModal from "../components/sales/WholesaleSaleModal";
 
 const Sales = () => {
   const [products, setProducts] = useState([]);
   const [productCounts, setProductCounts] = useState({});
   const [salesHistory, setSalesHistory] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
+  const [wholesalesItems, setWholesalesItems] = useState([]);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState("");
@@ -45,6 +47,7 @@ const Sales = () => {
       );
       setProducts(res.data.units);
       setProductCounts(res.data.productCounts);
+      console.log(res.data);
     } catch (error) {
       toast.error("فشل في جلب المنتجات");
     }
@@ -55,6 +58,8 @@ const Sales = () => {
       const res = await axios.get(
         `${import.meta.env.VITE_API_URL}api/products/sell`
       );
+      console.log(res.data.reverse());
+
       setSalesHistory(res.data);
     } catch (error) {
       toast.error("فشل في جلب تاريخ المبيعات");
@@ -128,56 +133,7 @@ const Sales = () => {
   const printInvoice = (seclectedItem) => {
     console.log(seclectedItem);
     const printContent = document.createElement("div");
-    // what about making the invoice look like a real invoice good style please
-    // printContent.innerHTML = `
-    //   <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right; padding: 20px;">
 
-    //     <h2 style="text-align: center; margin-bottom: 20px;">فاتورة البيع شركه <span style="font-weight: bold;">BM</span></h2>
-    //     <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-    //       <thead>
-    //         <tr>
-    //           <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">المنتج</th>
-    //           <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">الكمية</th>
-    //           <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">السعر للوحدة</th>
-    //           <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">الإجمالي</th>
-    //         </tr>
-    //       </thead>
-    //       <tbody>
-    //         ${seclectedItem
-    //           .map(
-    //             (item) => `
-    //           <tr>
-    //             <td style="border: 1px solid #ddd; padding: 8px;">${
-    //               item.name
-    //             } (${item.code})</td>
-    //             <td style="border: 1px solid #ddd; padding: 8px;">${
-    //               item.quantity
-    //             }</td>
-    //             <td style="border: 1px solid #ddd; padding: 8px;">${item.unitPrice.toFixed(
-    //               2
-    //             )} جنيه</td>
-    //             <td style="border: 1px solid #ddd; padding: 8px;">${(
-    //               item.quantity * item.unitPrice
-    //             ).toFixed(2)} جنيه</td>
-    //           </tr>
-    //         `
-    //           )
-    //           .join("")}
-    //       </tbody>
-    //         <tfoot>
-    //         <tr>
-    //             <td colspan="3" style="border: 1px solid #ddd; padding: 8px; text-align: right;">الإجمالي</td>
-    //             <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${seclectedItem
-    //               .reduce(
-    //                 (total, item) => total + item.quantity * item.unitPrice,
-    //                 0
-    //               )
-    //               .toFixed(2)} جنيه</td>
-    //         </tr>
-    //         </tfoot>
-    //     </table>
-    //   </div>
-    // `;
     printContent.innerHTML = `
       <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right; padding: 20px;">
         <h2 style="text-align: center; margin-bottom: 20px;">فاتورة البيع</h2>
@@ -260,6 +216,38 @@ const Sales = () => {
       printWindow.close();
     }, 500);
   };
+  // Add handler to add wholesale item
+  const handleAddWholesaleItem = (item) => {
+    setWholesalesItems((prev) => [...prev, item]);
+  };
+
+  const handleWholesaleSell = async () => {
+    if (wholesalesItems.length === 0) return;
+    try {
+      const items = wholesalesItems.map(
+        ({ productId, unitIds, unitPrice }) => ({
+          productId,
+          unitIds,
+          unitPrice, // send custom wholesale price
+        })
+      );
+      await axios.post(`${import.meta.env.VITE_API_URL}api/products/sell`, {
+        items,
+      });
+      toast.success("تمت عملية بيع الجملة بنجاح", { duration: 3000 });
+      setWholesalesItems([]);
+      fetchUnits();
+      fetchSalesHistory();
+    } catch (error) {
+      toast.error("فشل في تنفيذ عملية بيع الجملة");
+    }
+  };
+  // Add handler to cancel wholesale sale
+  const cancelWholesaleSell = () => {
+    if (!window.confirm("هل أنت متأكد من إلغاء بيع الجملة؟")) return;
+    setWholesalesItems([]);
+    toast.info("تم إلغاء بيع الجملة");
+  };
 
   return (
     <div
@@ -296,38 +284,45 @@ const Sales = () => {
       <div className="p-6 space-y-6">
         {/* Header */}
 
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold">صفحة المبيعات</h2>
-          <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-            <DialogTrigger asChild>
-              <Button>بيع منتج</Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>اختر منتجاً للبيع</DialogTitle>
-              </DialogHeader>
-              <select
-                className="w-full border rounded p-2"
-                value={selectedProductId}
-                onChange={(e) => setSelectedProductId(e.target.value)}
-              >
-                <option value="">-- اختر منتجاً --</option>
-                {Object.values(productCounts).map(({ product }) => (
-                  <option key={product._id} value={product._id}>
-                    {product.name}
-                  </option>
-                ))}
-              </select>
-              <Input
-                type="number"
-                min={1}
-                value={quantity}
-                onChange={(e) => setQuantity(Number(e.target.value))}
-                placeholder="الكمية"
-              />
-              <Button onClick={handleAddItem}>إضافة</Button>
-            </DialogContent>
-          </Dialog>
+          <div className="flex gap-2">
+            <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+              <DialogTrigger asChild>
+                <Button>بيع منتج</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>اختر منتجاً للبيع</DialogTitle>
+                </DialogHeader>
+                <select
+                  className="w-full border rounded p-2"
+                  value={selectedProductId}
+                  onChange={(e) => setSelectedProductId(e.target.value)}
+                >
+                  <option value="">-- اختر منتجاً --</option>
+                  {Object.values(productCounts).map(({ product }) => (
+                    <option key={product._id} value={product._id}>
+                      {product.name}
+                    </option>
+                  ))}
+                </select>
+                <Input
+                  type="number"
+                  min={1}
+                  value={quantity}
+                  onChange={(e) => setQuantity(Number(e.target.value))}
+                  placeholder="الكمية"
+                />
+                <Button onClick={handleAddItem}>إضافة</Button>
+              </DialogContent>
+            </Dialog>
+            <WholesaleSaleModal
+              products={products}
+              productCounts={productCounts}
+              onAddWholesaleItem={handleAddWholesaleItem}
+            />
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -371,6 +366,36 @@ const Sales = () => {
               onClick={() => printInvoice(selectedItems)}
             >
               طباعة الفاتورة
+            </Button>
+          </div>
+        )}
+
+        {wholesalesItems.length > 0 && (
+          <div className="border p-4 rounded-md bg-white mt-6">
+            <h3 className="font-semibold mb-2">عناصر بيع الجملة:</h3>
+            <ul className="list-disc pl-5">
+              {wholesalesItems.map((item, idx) => (
+                <li key={idx}>
+                  {item.name}: [الكمية: {item.quantity} -- السعر:{" "}
+                  {item.unitPrice} -- الإجمالي:{" "}
+                  {(item.quantity * item.unitPrice).toFixed(2)}]
+                </li>
+              ))}
+            </ul>
+            <Button className="mt-2" onClick={handleWholesaleSell}>
+              تنفيذ بيع الجملة
+            </Button>
+            <Button
+              className="mt-2 mr-2 bg-red-500 hover:bg-red-600"
+              onClick={cancelWholesaleSell}
+            >
+              إلغاء بيع الجملة
+            </Button>
+            <Button
+              className="mt-2 mr-2 bg-blue-500 hover:bg-blue-600"
+              onClick={() => printInvoice(wholesalesItems)}
+            >
+              طباعة فاتورة بيع الجملة
             </Button>
           </div>
         )}
