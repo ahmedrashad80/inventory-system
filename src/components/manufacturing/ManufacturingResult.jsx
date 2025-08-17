@@ -143,22 +143,20 @@ const ManufacturingResult = ({
         // الفاصل قبل كل استيكر ما عدا الأول
         const pageBreak = idx > 0 ? "page-break-before: always;" : "";
         return `
-        <div style="width:8cm;height:5cm;display:block ;box-sizing:border-box;margin:0;padding:2mm;overflow:hidden;${pageBreak}">
+        <div style="width:5cm;height:5cm;display:block ;box-sizing:border-box;margin:0;padding:2mm;overflow:hidden;${pageBreak}">
           <div style="border:1px solid #ccc; border-radius:6px; padding:8px; width:100%; height:100%; font-size:12px; direction:rtl; text-align:right; box-sizing:border-box;">
 
 
             <div>${unit.serialNumber}</div>
 
-             <div style="display: flex; justify-content: space-between; gap:5px;">
-             <div style="margin: 8px; margin-left: 8px;">
+             <div style="display: flex; justify-content: space-between;">
+             <div style="margin: 5px; margin-left: 8px;">
              <img src="${qrDataUrl}" alt="QR" style="width:48px;height:48px;" />
              </div>
-             <div style="width: 5px;"></div>
+             </div>
              <div>
               <img src="${barcodeDataUrl}" alt="Barcode" style="height:40px;" />
               </div>
-
-            </div>
           </div>
         </div>
       `;
