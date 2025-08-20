@@ -23,6 +23,7 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Boxes, Sparkles } from "lucide-react";
 import WholesaleSaleModal from "../components/sales/WholesaleSaleModal";
+import ClientData from "../components/sales/ClientData";
 
 const Sales = () => {
   const [products, setProducts] = useState([]);
@@ -34,6 +35,8 @@ const Sales = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState("");
   const [quantity, setQuantity] = useState(1);
+  const [clientName, setClientName] = useState("");
+  const [clientPhone, setClientPhone] = useState("");
 
   useEffect(() => {
     fetchUnits();
@@ -130,13 +133,15 @@ const Sales = () => {
   };
 
   //   function to print the invoice
-  const printInvoice = (seclectedItem) => {
-    console.log(seclectedItem);
+  const printInvoice = (seclectedItem, clientName = "", clientPhone = "") => {
     const printContent = document.createElement("div");
 
     printContent.innerHTML = `
-      <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right; padding: 20px;">
-        <h2 style="text-align: center; margin-bottom: 20px;">فاتورة البيع</h2>
+       <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right; padding: 20px; positon:relative">
+
+
+         <img src="/bm.png" alt="Logo" style="position: absolute; top: 1rem; left: 1rem; width: 100px; height: 100px; margin: 0;" />
+      <h2 style="text-align: center; margin-bottom: 20px;">فاتورة البيع</h2>
         <p style="text-align: center; font-weight: bold; font-size: 1.2em;">شركة BM</p>
 
         <p style="text-align: center; margin-bottom: 20px;">تاريخ: ${new Date().toLocaleDateString(
@@ -147,7 +152,16 @@ const Sales = () => {
             day: "numeric",
           }
         )}</p>
-        ${` <p style="text-align: center; margin-bottom: 20px;">اسم العميل: ................  </p>`}
+        ${
+          clientName
+            ? `<p style="text-align: center; margin-bottom: 20px;">اسم العميل: ${clientName}</p>`
+            : `<p style="text-align: center; margin-bottom: 20px;">اسم العميل: .................</p>`
+        }
+        ${
+          clientPhone
+            ? `<p style="text-align: center; margin-bottom: 20px;">رقم الهاتف: ${clientPhone}</p>`
+            : `<p style="text-align: center; margin-bottom: 20px;">رقم الهاتف: ...............</p>`
+        }
         <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
           <thead>
             <tr>
@@ -201,7 +215,7 @@ const Sales = () => {
         </p>
 
         <p style="text-align: center; margin-top: 10px; font-size: 0.9em; color: gray;">
-          رقم الاتصال: 0123456789
+          رقم الاتصال:01091144077
         </p>
 
       </div>
@@ -352,6 +366,12 @@ const Sales = () => {
                 </li>
               ))}
             </ul>
+            <ClientData
+              clientName={clientName}
+              setClientName={setClientName}
+              clientPhone={clientPhone}
+              setClientPhone={setClientPhone}
+            />
             <Button className="mt-2" onClick={handleSell}>
               تنفيذ البيع
             </Button>
@@ -363,7 +383,9 @@ const Sales = () => {
             </Button>
             <Button
               className="mt-2 mr-2 bg-blue-500 hover:bg-blue-600"
-              onClick={() => printInvoice(selectedItems)}
+              onClick={() =>
+                printInvoice(selectedItems, clientName, clientPhone)
+              }
             >
               طباعة الفاتورة
             </Button>
@@ -382,6 +404,12 @@ const Sales = () => {
                 </li>
               ))}
             </ul>
+            <ClientData
+              clientName={clientName}
+              setClientName={setClientName}
+              clientPhone={clientPhone}
+              setClientPhone={setClientPhone}
+            />
             <Button className="mt-2" onClick={handleWholesaleSell}>
               تنفيذ بيع الجملة
             </Button>
@@ -393,7 +421,9 @@ const Sales = () => {
             </Button>
             <Button
               className="mt-2 mr-2 bg-blue-500 hover:bg-blue-600"
-              onClick={() => printInvoice(wholesalesItems)}
+              onClick={() =>
+                printInvoice(wholesalesItems, clientName, clientPhone)
+              }
             >
               طباعة فاتورة بيع الجملة
             </Button>

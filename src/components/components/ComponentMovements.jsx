@@ -210,6 +210,7 @@ const ComponentMovements = ({ movements }) => {
                                   code: "الكود",
                                   quantity: "الكمية",
                                   unit_price: "سعر الوحدة",
+                                  selling_price: "سعر البيع",
                                   supplier: "المورد",
                                   image: "الصورة",
                                 };

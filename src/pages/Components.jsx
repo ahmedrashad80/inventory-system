@@ -33,14 +33,32 @@ const Components = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showStockModal, setShowStockModal] = useState(false);
   const [selectedComponent, setSelectedComponent] = useState(null);
+  // unit_price: {
+  //   type: Number,
+  //   default: 0,
+  // },
+
+  // selling_price: {
+  //   type: Number,
+  //   default: function () {
+  //     return this.0;
+  //   },
+  // }, in model of component i add selling price so i want change the code
+  // if (selling_price && selling_price <= unit_price) {
+  //   return res
+  //     .status(400)
+  //     .json({ message: "سعر البيع يجب أن يكون أكبر من " });
+  // }
+
   const [formData, setFormData] = useState({
     code: "",
     name: "",
     quantity: "",
     unit_price: "",
+    selling_price: "",
     supplier: "",
     image: null,
-    reason: "", // جديد
+    reason: "",
   });
   const [stockData, setStockData] = useState({
     quantity: "",
@@ -145,6 +163,7 @@ const Components = () => {
         name: formData.name,
         quantity: parseInt(formData.quantity) || 0,
         unit_price: parseFloat(formData.unit_price) || 0,
+        selling_price: parseFloat(formData.selling_price) || 0,
         supplier: formData.supplier || "",
       };
 
@@ -202,6 +221,7 @@ const Components = () => {
         name: formData.name,
         quantity: parseInt(formData.quantity) || 0,
         unit_price: parseFloat(formData.unit_price) || 0,
+        selling_price: parseFloat(formData.selling_price) || 0,
         supplier: formData.supplier || "",
         reason: formData.reason, // أضف السبب هنا
       };
@@ -272,6 +292,7 @@ const Components = () => {
       name: "",
       quantity: "",
       unit_price: "",
+      selling_price: "",
       supplier: "",
       image: null,
       reason: "", // جديد
@@ -286,6 +307,7 @@ const Components = () => {
       name: component.name,
       quantity: component.quantity.toString(),
       unit_price: component.unit_price.toString(),
+      selling_price: component.selling_price.toString(),
       supplier: component.supplier || "",
       image: null,
       reason: "تعديل يدوي للمكون", // جديد
@@ -461,6 +483,9 @@ const Components = () => {
                       سعر الوحدة
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      سعر البيع
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       المورد
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -492,6 +517,9 @@ const Components = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {component.unit_price} جنيه
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {component.selling_price} جنيه
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {component.supplier || "غير محدد"}
@@ -635,7 +663,26 @@ const Components = () => {
                     placeholder="0.00"
                   />
                 </div>
-
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    سعر البيع (جنيه)
+                  </label>
+                  <input
+                    type="number"
+                    step="1"
+                    required
+                    min={formData.unit_price}
+                    value={formData.selling_price}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        selling_price: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="0.00"
+                  />
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     المورد (اختياري)
