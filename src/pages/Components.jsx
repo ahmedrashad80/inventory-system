@@ -33,22 +33,6 @@ const Components = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showStockModal, setShowStockModal] = useState(false);
   const [selectedComponent, setSelectedComponent] = useState(null);
-  // unit_price: {
-  //   type: Number,
-  //   default: 0,
-  // },
-
-  // selling_price: {
-  //   type: Number,
-  //   default: function () {
-  //     return this.0;
-  //   },
-  // }, in model of component i add selling price so i want change the code
-  // if (selling_price && selling_price <= unit_price) {
-  //   return res
-  //     .status(400)
-  //     .json({ message: "سعر البيع يجب أن يكون أكبر من " });
-  // }
 
   const [formData, setFormData] = useState({
     code: "",
@@ -57,8 +41,10 @@ const Components = () => {
     unit_price: "",
     selling_price: "",
     supplier: "",
-    image: null,
+    images: [],
+    existingImages: [],
     reason: "",
+    store: true,
   });
   const [stockData, setStockData] = useState({
     quantity: "",
@@ -165,24 +151,34 @@ const Components = () => {
         unit_price: parseFloat(formData.unit_price) || 0,
         selling_price: parseFloat(formData.selling_price) || 0,
         supplier: formData.supplier || "",
+        store: formData.store,
       };
 
-      // If there's an image, use FormData instead
-      if (formData.image) {
-        const formDataToSend = new FormData();
+      // // If there's an image, use FormData instead
+      // if (formData.images) {
+      //   const formDataToSend = new FormData();
 
-        // Add all form fields to FormData
-        Object.keys(componentData).forEach((key) => {
-          formDataToSend.append(key, componentData[key]);
-        });
+      //   // Add all form fields to FormData
+      //   Object.keys(componentData).forEach((key) => {
+      //     formDataToSend.append(key, componentData[key]);
+      //   });
 
-        // Add the image
-        formDataToSend.append("image", formData.image);
+      //   // Add the image
+      //   formDataToSend.append("image", formData.images);
 
-        await addComponent.mutateAsync(formDataToSend);
+      //   await addComponent.mutateAsync(formDataToSend);
+      // } else {
+      //   // No image, use JSON
+      //   await addComponent.mutateAsync(componentData);
+      // }
+      if (formData.images && formData.images.length > 0) {
+        const fd = new FormData();
+        Object.entries(componentData).forEach(([k, v]) => fd.append(k, v));
+        // ← لازم نفس اسم الحقل في المولتر
+        formData.images.forEach((file) => fd.append("images", file));
+        await addComponent.mutateAsync(fd);
       } else {
-        // No image, use JSON
-        await addComponent.mutateAsync(componentData);
+        await addComponent.mutateAsync(componentData); // بدون صور → الباك إند يحفظ []
       }
 
       toast({
@@ -224,26 +220,44 @@ const Components = () => {
         selling_price: parseFloat(formData.selling_price) || 0,
         supplier: formData.supplier || "",
         reason: formData.reason, // أضف السبب هنا
+        store: formData.store,
       };
 
       // If there's an image, use FormData instead
-      if (formData.image) {
-        const formDataToSend = new FormData();
+      // if (formData.images) {
+      //   const formDataToSend = new FormData();
 
-        // Add all form fields to FormData
-        Object.keys(componentData).forEach((key) => {
-          formDataToSend.append(key, componentData[key]);
-        });
+      //   // Add all form fields to FormData
+      //   Object.keys(componentData).forEach((key) => {
+      //     formDataToSend.append(key, componentData[key]);
+      //   });
 
-        // Add the image
-        formDataToSend.append("image", formData.image);
+      //   // Add the image
+      //   formDataToSend.append("image", formData.images);
 
+      //   await updateComponent.mutateAsync({
+      //     id: selectedComponent._id,
+      //     data: formDataToSend,
+      //   });
+      // } else {
+      //   // No image, use JSON
+      //   await updateComponent.mutateAsync({
+      //     id: selectedComponent._id,
+      //     data: componentData,
+      //   });
+      // }
+
+      if (formData.images && formData.images.length > 0) {
+        // المستخدم اختار صورة جديدة → نستبدل القديمة
+        const fd = new FormData();
+        Object.entries(componentData).forEach(([k, v]) => fd.append(k, v));
+        formData.images.forEach((file) => fd.append("images", file)); // ← اسم الحقل "images"
         await updateComponent.mutateAsync({
           id: selectedComponent._id,
-          data: formDataToSend,
+          data: fd,
         });
       } else {
-        // No image, use JSON
+        // مفيش صور جديدة → لا نلمس الصور القديمة
         await updateComponent.mutateAsync({
           id: selectedComponent._id,
           data: componentData,
@@ -294,8 +308,10 @@ const Components = () => {
       unit_price: "",
       selling_price: "",
       supplier: "",
-      image: null,
+      images: [], // ← ملفات جديدة (File[])
+      existingImages: [], // ← روابط موجودة من الداتابيز
       reason: "", // جديد
+      store: true,
     });
     setSelectedComponent(null);
   };
@@ -309,8 +325,10 @@ const Components = () => {
       unit_price: component.unit_price.toString(),
       selling_price: component.selling_price.toString(),
       supplier: component.supplier || "",
-      image: null,
+      images: [], // ← لا نرفع حاجة إلا لو المستخدم اختار جديد
+      existingImages: component.image || [], // ← الروابط الحالية الموجودة
       reason: "تعديل يدوي للمكون", // جديد
+      store: component.store,
     });
     setShowEditModal(true);
   };
@@ -486,7 +504,7 @@ const Components = () => {
                       سعر البيع
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      المورد
+                      المتجر
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       الإجراءات
@@ -522,7 +540,7 @@ const Components = () => {
                         {component.selling_price} جنيه
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {component.supplier || "غير محدد"}
+                        {component.store ? "يتم عرضه" : "غير قابل للبيع"}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <div className="flex space-x-2 space-x-reverse">
@@ -697,8 +715,21 @@ const Components = () => {
                     placeholder="اسم المورد"
                   />
                 </div>
-
-                <div>
+                {/* {selectedComponent &&
+                  selectedComponent.image &&
+                  selectedComponent.image.length > 0 && (
+                    <div className="mb-2">
+                      <img
+                        src={selectedComponent.image[0]}
+                        alt="صورة المكون"
+                        className="w-24 h-24 object-cover rounded-lg border"
+                      />
+                      <p className="text-sm text-gray-500 mt-1">
+                        الصورة الحالية
+                      </p>
+                    </div>
+                  )} */}
+                {/* <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     صورة المكون (اختياري)
                   </label>
@@ -710,6 +741,56 @@ const Components = () => {
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
+                </div> */}
+
+                {/* صورة المكون (اختياري) */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    صورة المكون (اختياري)
+                  </label>
+
+                  {/* لو فيه صورة قديمة، نعرضها كـ preview */}
+                  {formData.existingImages?.[0] && (
+                    <div className="mb-2">
+                      <img
+                        src={formData.existingImages[0]}
+                        alt="صورة حالية"
+                        className="h-20 w-20 object-cover rounded border"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        لن يتم تغيير الصورة إلا إذا اخترت صورة جديدة.
+                      </p>
+                    </div>
+                  )}
+
+                  <input
+                    type="file"
+                    accept="image/*"
+                    // single file (متوافق مع upload.array("images", 1))
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files || []);
+                      setFormData((prev) => ({ ...prev, images: files })); // ← نخزن الملفات الجديدة
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div className="flex items-center">
+                  <input
+                    id="store"
+                    type="checkbox"
+                    checked={formData.store}
+                    onChange={(e) =>
+                      setFormData({ ...formData, store: e.target.checked })
+                    }
+                    className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <label
+                    htmlFor="store"
+                    className="mx-2 block text-base text-gray-700"
+                  >
+                    عرض في المتجر
+                  </label>
                 </div>
 
                 {selectedComponent && (

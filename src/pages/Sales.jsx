@@ -339,7 +339,7 @@ const Sales = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-[30px]">
           {Object.values(productCounts).map(({ product, count }) => (
             <Card key={product._id}>
               <CardHeader>

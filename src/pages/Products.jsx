@@ -37,6 +37,7 @@ const Products = () => {
   });
   // في useState أضف حالة جديدة للصور القديمة
   const [oldImages, setOldImages] = useState([]);
+  const [deletedImages, setDeletedImages] = useState([]);
 
   // تعديل دالة handleSubmit
   const handleSubmit = async (e) => {
@@ -61,17 +62,39 @@ const Products = () => {
           formDataToSend.append(key, productData[key]);
         }
       });
-
-      // إضافة جميع الصور
-      formData.images.forEach((img, index) => {
+      // تصنيف الصور إلى قديمة وجديدة
+      const oldImagesKept = [];
+      const newImages = [];
+      formData.images.forEach((img) => {
         if (typeof img === "string") {
-          // إذا كانت الصورة URL
-          formDataToSend.append(`image`, img);
+          // صورة قديمة محتفظ بها
+          oldImagesKept.push(img);
         } else {
-          // إذا كانت الصورة ملف جديد
-          formDataToSend.append(`image`, img);
+          // صورة جديدة
+          newImages.push(img);
         }
       });
+      // إضافة الصور القديمة المحتفظ بها
+      if (selectedProduct) {
+        formDataToSend.append("oldImages", JSON.stringify(oldImagesKept));
+        formDataToSend.append("deletedImages", JSON.stringify(deletedImages));
+      }
+
+      // إضافة الصور الجديدة
+      newImages.forEach((img) => {
+        formDataToSend.append(`image`, img);
+      });
+
+      // // إضافة جميع الصور
+      // formData.images.forEach((img, index) => {
+      //   if (typeof img === "string") {
+      //     // إذا كانت الصورة URL
+      //     formDataToSend.append(`image`, img);
+      //   } else {
+      //     // إذا كانت الصورة ملف جديد
+      //     formDataToSend.append(`image`, img);
+      //   }
+      // });
 
       if (selectedProduct) {
         await updateProduct.mutateAsync({
@@ -79,6 +102,10 @@ const Products = () => {
           data: formDataToSend,
         });
       } else {
+        // للمنتجات الجديدة، أضف جميع الصور كصور جديدة
+        formData.images.forEach((img) => {
+          formDataToSend.append(`image`, img);
+        });
         await addProduct.mutateAsync(formDataToSend);
       }
 
@@ -90,7 +117,7 @@ const Products = () => {
       });
 
       resetForm();
-      setOldImages([]); // إعادة تعيين الصور القديمة
+      // setOldImages([]); // إعادة تعيين الصور القديمة
       setShowAddModal(false);
       setShowEditModal(false);
     } catch (error) {
@@ -133,6 +160,7 @@ const Products = () => {
     });
     setSelectedProduct(null);
     setOldImages([]); // تأكد من إعادة تعيين الصور القديمة أيضاً
+    setDeletedImages([]);
   };
 
   const openEditModal = (product) => {
@@ -150,6 +178,9 @@ const Products = () => {
         })) || [],
       images: product.image || [], // نضع الصور الموجودة
     });
+    // إعادة تعيين الصور القديمة والمحذوفة
+    setOldImages(product.image || []);
+    setDeletedImages([]);
     setShowEditModal(true);
   };
 
@@ -211,11 +242,27 @@ const Products = () => {
   };
 
   // دالة لحذف أي صورة
+  // const removeImage = (indexToRemove) => {
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     images: prev.images.filter((_, index) => index !== indexToRemove),
+  //   }));
+  // };
   const removeImage = (indexToRemove) => {
+    const imageToRemove = formData.images[indexToRemove];
+
     setFormData((prev) => ({
       ...prev,
       images: prev.images.filter((_, index) => index !== indexToRemove),
     }));
+
+    // إذا كانت الصورة من الصور القديمة، أضفها للمحذوفة
+    if (
+      typeof imageToRemove === "string" &&
+      oldImages.includes(imageToRemove)
+    ) {
+      setDeletedImages((prev) => [...prev, imageToRemove]);
+    }
   };
 
   return (
@@ -569,8 +616,20 @@ const Products = () => {
                               className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                               title="حذف الصورة"
                             >
-                              <X className="w-4 w-4" />
+                              <X className="w-4 h-4" />
                             </button>
+                            {/* عرض علامة للصور القديمة */}
+                            {typeof img === "string" && (
+                              <div className="absolute bottom-0 left-0 bg-blue-500 text-white text-xs px-1 rounded-tr">
+                                قديمة
+                              </div>
+                            )}
+                            {/* عرض علامة للصور الجديدة */}
+                            {typeof img !== "string" && (
+                              <div className="absolute bottom-0 left-0 bg-green-500 text-white text-xs px-1 rounded-tr">
+                                جديدة
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
