@@ -49,6 +49,8 @@ const OrdersList = ({
               <th style="border: 1px solid #ddd; padding: 8px;">المنتج</th>
               <th style="border: 1px solid #ddd; padding: 8px;">الكمية</th>
               <th style="border: 1px solid #ddd; padding: 8px;">السعر للوحدة</th>
+              <th style="border: 1px solid #ddd; padding: 8px;">نسبه الخصم</th>
+              <th style="border: 1px solid #ddd; padding: 8px;">السعر النهائي</th>
               <th style="border: 1px solid #ddd; padding: 8px;">الإجمالي</th>
             </tr>
           </thead>
@@ -61,11 +63,18 @@ const OrdersList = ({
                 <td style="border: 1px solid #ddd; padding: 8px;">${
                   p.quantity
                 }</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">${p.price.toFixed(
-                  2
-                )} جنيه</td>
+                  <td style="border: 1px solid #ddd; padding: 8px;">${p.price.toFixed(
+                    2
+                  )} جنيه</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">${
+                  p.discount
+                } %</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">${
+                  (p.price * (100 - p.discount)) / 100
+                }جنيه </td>
                 <td style="border: 1px solid #ddd; padding: 8px;">${(
-                  p.price * p.quantity
+                  ((p.price * (100 - p.discount)) / 100) *
+                  p.quantity
                 ).toFixed(2)} جنيه</td>
               </tr>
             `
@@ -74,13 +83,13 @@ const OrdersList = ({
           </tbody>
           <tfoot>
             <tr>
-              <td colspan="3" style="border: 1px solid #ddd; padding: 8px; text-align: right;">تكلفه الشحن</td>
+              <td colspan="5" style="border: 1px solid #ddd; padding: 8px; text-align: right;">تكلفه الشحن</td>
               <td style="border: 1px solid #ddd; padding: 8px;">
                 ${order.shippingCost} جنيه
               </td>
             </tr>
             <tr>
-              <td colspan="3" style="border: 1px solid #ddd; padding: 8px; text-align: right;">الإجمالي</td>
+              <td colspan="5" style="border: 1px solid #ddd; padding: 8px; text-align: right;">الإجمالي</td>
               <td style="border: 1px solid #ddd; padding: 8px;">
                 ${order.totalPrice} جنيه
               </td>
@@ -220,7 +229,8 @@ const OrdersList = ({
                             <ul className="list-disc list-inside ml-4">
                               {order.products.map((p, i) => (
                                 <li key={i}>
-                                  {p.name} - {p.quantity} × {p.price} جنيه
+                                  {p.name} - {p.quantity} ×{" "}
+                                  {(p.price * (100 - p.discount)) / 100} جنيه
                                 </li>
                               ))}
                             </ul>

@@ -34,10 +34,31 @@ const Products = () => {
     price: "",
     components: [],
     images: [], // مصفوفة واحدة لجميع الصور
+    discount: 0,
+    finalPrice: "",
   });
   // في useState أضف حالة جديدة للصور القديمة
   const [oldImages, setOldImages] = useState([]);
   const [deletedImages, setDeletedImages] = useState([]);
+  useEffect(() => {
+    const price = parseFloat(formData.price) || 0;
+    const discount = formData.discount || 0;
+
+    if (price > 0) {
+      const discountAmount = (price * discount) / 100;
+      const finalPrice = price - discountAmount;
+
+      setFormData((prev) => ({
+        ...prev,
+        finalPrice: finalPrice.toFixed(2),
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        finalPrice: "",
+      }));
+    }
+  }, [formData.price, formData.discount]);
 
   // تعديل دالة handleSubmit
   const handleSubmit = async (e) => {
@@ -52,6 +73,7 @@ const Products = () => {
         price: formData.price || 0,
         description: formData.description || "",
         components: formData.components || [],
+        discount: formData.discount || 0,
       };
 
       // إضافة البيانات للFormData
@@ -84,17 +106,6 @@ const Products = () => {
       newImages.forEach((img) => {
         formDataToSend.append(`image`, img);
       });
-
-      // // إضافة جميع الصور
-      // formData.images.forEach((img, index) => {
-      //   if (typeof img === "string") {
-      //     // إذا كانت الصورة URL
-      //     formDataToSend.append(`image`, img);
-      //   } else {
-      //     // إذا كانت الصورة ملف جديد
-      //     formDataToSend.append(`image`, img);
-      //   }
-      // });
 
       if (selectedProduct) {
         await updateProduct.mutateAsync({
@@ -157,6 +168,7 @@ const Products = () => {
       price: "",
       components: [],
       images: [], // تغيير من null إلى مصفوفة فارغة
+      discount: 0,
     });
     setSelectedProduct(null);
     setOldImages([]); // تأكد من إعادة تعيين الصور القديمة أيضاً
@@ -177,6 +189,7 @@ const Products = () => {
           quantity_required: comp.quantity_required,
         })) || [],
       images: product.image || [], // نضع الصور الموجودة
+      discount: product.discount || 0,
     });
     // إعادة تعيين الصور القديمة والمحذوفة
     setOldImages(product.image || []);
@@ -241,13 +254,6 @@ const Products = () => {
     }
   };
 
-  // دالة لحذف أي صورة
-  // const removeImage = (indexToRemove) => {
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     images: prev.images.filter((_, index) => index !== indexToRemove),
-  //   }));
-  // };
   const removeImage = (indexToRemove) => {
     const imageToRemove = formData.images[indexToRemove];
 
@@ -447,6 +453,20 @@ const Products = () => {
                       <span className="text-red-600">غير محدد</span>
                     )}
                   </div>
+                  <div className="text-sm text-gray-700 mb-4">
+                    <span className="font-medium">الخصم:</span>{" "}
+                    <span className="text-green-600">{product.discount} %</span>
+                  </div>
+                  <div className="text-sm text-gray-700 mb-4">
+                    <span className="font-medium"> السعر النهائي:</span>{" "}
+                    <span className="text-green-600">
+                      {(
+                        product.price -
+                        (product.price * product.discount) / 100
+                      ).toFixed(2)}{" "}
+                      جنيه
+                    </span>
+                  </div>
 
                   {/* Components List */}
                   <div className="space-y-2">
@@ -572,6 +592,33 @@ const Products = () => {
                       }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       placeholder="مثال: 100"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      نسبة الخصم %
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      value={formData.discount}
+                      onChange={(e) =>
+                        setFormData({ ...formData, discount: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="مثال: 5"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      السعر النهائي{" "}
+                    </label>
+                    <input
+                      type="number"
+                      //  i want to make it calculated from price and discount and for read only
+                      readOnly
+                      value={formData.finalPrice}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     />
                   </div>
                 </div>
