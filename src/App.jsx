@@ -15,6 +15,8 @@ import Sales from "./pages/Sales";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 import Orders from "./pages/Orders";
+import Traders from "./pages/Traders";
+import TraderPage from "./pages/TraderPage";
 
 const queryClient = new QueryClient();
 
@@ -79,6 +81,22 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <Orders />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/traders"
+            element={
+              <ProtectedRoute>
+                <Traders />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/traders/:id"
+            element={
+              <ProtectedRoute>
+                <TraderPage />
               </ProtectedRoute>
             }
           />

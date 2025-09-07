@@ -223,6 +223,13 @@ const Index = () => {
       icon: Package,
       color: "from-red-500 to-red-600",
     },
+    {
+      title: "إدارة التجار",
+      description: "عرض وإدارة التجار والعملاء",
+      link: "/traders",
+      icon: Package,
+      color: "from-teal-500 to-teal-600",
+    },
   ];
 
   return (

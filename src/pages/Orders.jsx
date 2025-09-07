@@ -238,7 +238,7 @@ const Orders = () => {
     setShowEditModal(false);
   };
 
-  // Stats cards JSX (place inside <main> before OrdersList)
+  // Stats cards JSX
   const StatsCards = () => {
     const totalOrders = orders.filter(
       (order) => order.status === "معلق"
