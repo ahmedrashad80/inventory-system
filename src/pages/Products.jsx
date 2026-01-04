@@ -13,19 +13,28 @@ import {
   Upload,
   Download,
   X,
+  FolderOpen,
+  ToggleLeft,
+  ToggleRight,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useProducts } from "@/hooks/useProducts";
 import { useComponents } from "@/hooks/useComponents";
+import { useCategories } from "@/hooks/useCategories";
 
 const Products = () => {
   const { products, isLoading, addProduct, updateProduct, deleteProduct } =
     useProducts();
   const { components } = useComponents();
+  const { categories, addCategory, updateCategory, deleteCategory } = useCategories();
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showCategoriesModal, setShowCategoriesModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  // Category form states
+  const [categoryFormData, setCategoryFormData] = useState({ name: "", isActive: true });
+  const [editingCategory, setEditingCategory] = useState(null);
   // تعديل حالة formData لتحتوي على مصفوفة واحدة للصور
   const [formData, setFormData] = useState({
     code: "",
@@ -36,6 +45,7 @@ const Products = () => {
     images: [], // مصفوفة واحدة لجميع الصور
     discount: 0,
     finalPrice: "",
+    category: "",
   });
   // في useState أضف حالة جديدة للصور القديمة
   const [oldImages, setOldImages] = useState([]);
@@ -74,6 +84,7 @@ const Products = () => {
         description: formData.description || "",
         components: formData.components || [],
         discount: formData.discount || 0,
+        category: formData.category || null,
       };
 
       // إضافة البيانات للFormData
@@ -169,6 +180,7 @@ const Products = () => {
       components: [],
       images: [], // تغيير من null إلى مصفوفة فارغة
       discount: 0,
+      category: "",
     });
     setSelectedProduct(null);
     setOldImages([]); // تأكد من إعادة تعيين الصور القديمة أيضاً
@@ -190,6 +202,7 @@ const Products = () => {
         })) || [],
       images: product.image || [], // نضع الصور الموجودة
       discount: product.discount || 0,
+      category: product.category?._id || product.category || "",
     });
     // إعادة تعيين الصور القديمة والمحذوفة
     setOldImages(product.image || []);
@@ -303,16 +316,25 @@ const Products = () => {
                 </div>
               </div>
             </div>
-            <button
-              onClick={() => {
-                resetForm();
-                setShowAddModal(true);
-              }}
-              className="bg-gradient-to-r from-green-600 to-green-700 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all flex items-center space-x-2 space-x-reverse"
-            >
-              <Plus className="h-4 w-4" />
-              <span>إضافة منتج جديد</span>
-            </button>
+            <div className="flex items-center space-x-2 space-x-reverse">
+              <button
+                onClick={() => setShowCategoriesModal(true)}
+                className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all flex items-center space-x-2 space-x-reverse"
+              >
+                <FolderOpen className="h-4 w-4" />
+                <span>إدارة الأقسام</span>
+              </button>
+              <button
+                onClick={() => {
+                  resetForm();
+                  setShowAddModal(true);
+                }}
+                className="bg-gradient-to-r from-green-600 to-green-700 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all flex items-center space-x-2 space-x-reverse"
+              >
+                <Plus className="h-4 w-4" />
+                <span>إضافة منتج جديد</span>
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -441,6 +463,15 @@ const Products = () => {
                     <p className="text-sm text-gray-600 mb-4">
                       {product.description}
                     </p>
+                  )}
+                  {/* Product Category */}
+                  {product.category && (
+                    <div className="text-sm text-gray-700 mb-4">
+                      <span className="font-medium">القسم:</span>{" "}
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                        {product.category?.name || product.category}
+                      </span>
+                    </div>
                   )}
                   {/* Product price */}
                   <div className="text-sm text-gray-700 mb-4">
@@ -638,6 +669,42 @@ const Products = () => {
                   />
                 </div>
 
+                {/* Category Selection */}
+                <div className="relative">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    القسم
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={formData.category}
+                      onChange={(e) =>
+                        setFormData({ ...formData, category: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none bg-white"
+                    >
+                      <option value="">اختر القسم</option>
+                      {categories?.map((category) => (
+                        <option
+                          key={category._id}
+                          value={category._id}
+                          className={category.isActive ? "text-green-700" : "text-gray-800"}
+                        >
+                          {category.isActive ? "● " : "○ "}{category.name} {!category.isActive && "(غير نشط)"}
+                        </option>
+                      ))}
+                    </select>
+                    {/* Show selected category status */}
+                    {formData.category && (
+                      <span className={`absolute left-3 top-1/2 -translate-y-1/2 text-xs px-2 py-0.5 rounded-full ${categories?.find(c => c._id === formData.category)?.isActive
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-600"
+                        }`}>
+                        {categories?.find(c => c._id === formData.category)?.isActive ? "نشط" : "غير نشط"}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     صور المنتج ({formData.images.length}/5)
@@ -770,11 +837,10 @@ const Products = () => {
                 <div className="flex space-x-3 space-x-reverse pt-4">
                   <button
                     type="submit"
-                    className={`flex-1 bg-gradient-to-r ${
-                      selectedProduct
-                        ? "from-green-600 to-green-700"
-                        : "from-green-600 to-green-700"
-                    } text-white py-2 px-4 rounded-lg hover:shadow-lg transition-all`}
+                    className={`flex-1 bg-gradient-to-r ${selectedProduct
+                      ? "from-green-600 to-green-700"
+                      : "from-green-600 to-green-700"
+                      } text-white py-2 px-4 rounded-lg hover:shadow-lg transition-all`}
                   >
                     {selectedProduct ? "تحديث المنتج" : "إضافة المنتج"}
                   </button>
@@ -791,6 +857,208 @@ const Products = () => {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Categories Management Modal */}
+      {showCategoriesModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  إدارة الأقسام
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowCategoriesModal(false);
+                    setCategoryFormData({ name: "", isActive: true });
+                    setEditingCategory(null);
+                  }}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* Add/Edit Category Form */}
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  try {
+                    if (editingCategory) {
+                      await updateCategory.mutateAsync({
+                        id: editingCategory._id,
+                        data: categoryFormData,
+                      });
+                      toast({
+                        title: "تم بنجاح",
+                        description: "تم تحديث القسم بنجاح",
+                      });
+                    } else {
+                      await addCategory.mutateAsync(categoryFormData);
+                      toast({
+                        title: "تم بنجاح",
+                        description: "تم إضافة القسم بنجاح",
+                      });
+                    }
+                    setCategoryFormData({ name: "", isActive: true });
+                    setEditingCategory(null);
+                  } catch (error) {
+                    toast({
+                      title: "خطأ",
+                      description: error.response?.data?.message || "فشل في حفظ القسم",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+                className="mb-6"
+              >
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="اسم القسم الجديد..."
+                    value={categoryFormData.name}
+                    onChange={(e) =>
+                      setCategoryFormData({ ...categoryFormData, name: e.target.value })
+                    }
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    required
+                  />
+                  <button
+                    type="submit"
+                    className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all"
+                  >
+                    {editingCategory ? "تحديث" : "إضافة"}
+                  </button>
+                  {editingCategory && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCategoryFormData({ name: "", isActive: true });
+                        setEditingCategory(null);
+                      }}
+                      className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors"
+                    >
+                      إلغاء
+                    </button>
+                  )}
+                </div>
+              </form>
+
+              {/* Categories List */}
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium text-gray-700 mb-3">
+                  الأقسام الحالية ({categories?.length || 0})
+                </h4>
+                {categories?.length === 0 ? (
+                  <p className="text-sm text-gray-500 text-center py-4">
+                    لا توجد أقسام بعد
+                  </p>
+                ) : (
+                  categories?.map((category) => (
+                    <div
+                      key={category._id}
+                      className={`flex items-center justify-between p-3 rounded-lg ${category.isActive ? "bg-gray-50" : "bg-gray-200 opacity-60"
+                        }`}
+                    >
+                      <div className="flex items-center space-x-3 space-x-reverse">
+                        <span className={`font-medium ${!category.isActive && "text-gray-500"}`}>
+                          {category.name}
+                        </span>
+                        {!category.isActive && (
+                          <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">
+                            غير نشط
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center space-x-2 space-x-reverse">
+                        {/* Toggle Active Status */}
+                        <button
+                          onClick={async () => {
+                            try {
+                              await updateCategory.mutateAsync({
+                                id: category._id,
+                                data: { isActive: !category.isActive },
+                              });
+                              toast({
+                                title: "تم بنجاح",
+                                description: category.isActive
+                                  ? "تم إلغاء تفعيل القسم"
+                                  : "تم تفعيل القسم",
+                              });
+                            } catch (error) {
+                              toast({
+                                title: "خطأ",
+                                description: "فشل في تحديث حالة القسم",
+                                variant: "destructive",
+                              });
+                            }
+                          }}
+                          className={`p-1 rounded ${category.isActive
+                            ? "text-green-600 hover:bg-green-50"
+                            : "text-gray-400 hover:bg-gray-100"
+                            }`}
+                          title={category.isActive ? "إلغاء التفعيل" : "تفعيل"}
+                        >
+                          {category.isActive ? (
+                            <ToggleRight className="h-5 w-5" />
+                          ) : (
+                            <ToggleLeft className="h-5 w-5" />
+                          )}
+                        </button>
+                        {/* Edit Button */}
+                        <button
+                          onClick={() => {
+                            setEditingCategory(category);
+                            setCategoryFormData({
+                              name: category.name,
+                              isActive: category.isActive,
+                            });
+                          }}
+                          className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"
+                          title="تعديل"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        {/* Delete Button */}
+                        <button
+                          onClick={async () => {
+                            if (window.confirm("هل أنت متأكد من حذف هذا القسم؟")) {
+                              try {
+                                await deleteCategory.mutateAsync(category._id);
+                                toast({
+                                  title: "تم بنجاح",
+                                  description: "تم حذف القسم بنجاح",
+                                });
+                              } catch (error) {
+                                toast({
+                                  title: "خطأ",
+                                  description: "فشل في حذف القسم",
+                                  variant: "destructive",
+                                });
+                              }
+                            }
+                          }}
+                          className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
+                          title="حذف"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Modal Footer */}
+              <div className="mt-6 pt-4 border-t">
+                <p className="text-xs text-gray-500 text-center">
+                  💡 الأقسام غير النشطة لن تظهر في المتجر الإلكتروني للزبائن
+                </p>
+              </div>
             </div>
           </div>
         </div>
