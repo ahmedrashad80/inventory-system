@@ -8,6 +8,7 @@ import {
   TrendingUp,
   Wifi,
   WifiOff,
+  Settings,
 } from "lucide-react";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
@@ -230,6 +231,13 @@ const Index = () => {
       icon: Package,
       color: "from-teal-500 to-teal-600",
     },
+    {
+      title: "إعدادات النظام",
+      description: "تخصيص محتوى الموقع",
+      link: "/settings",
+      icon: Settings,
+      color: "from-slate-600 to-slate-700",
+    },
   ];
 
   return (
@@ -284,11 +292,10 @@ const Index = () => {
                 )}
               </div>
               <div
-                className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
-                  isOnline
+                className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${isOnline
                     ? "bg-green-100 text-green-800"
                     : "bg-red-100 text-red-800"
-                }`}
+                  }`}
               >
                 {isOnline ? (
                   <>

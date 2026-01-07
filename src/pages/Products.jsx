@@ -46,6 +46,7 @@ const Products = () => {
     discount: 0,
     finalPrice: "",
     category: "",
+    hasSpecialOfferToday: false,
   });
   // في useState أضف حالة جديدة للصور القديمة
   const [oldImages, setOldImages] = useState([]);
@@ -85,6 +86,7 @@ const Products = () => {
         components: formData.components || [],
         discount: formData.discount || 0,
         category: formData.category || null,
+        hasSpecialOfferToday: formData.hasSpecialOfferToday || false,
       };
 
       // إضافة البيانات للFormData
@@ -181,6 +183,7 @@ const Products = () => {
       images: [], // تغيير من null إلى مصفوفة فارغة
       discount: 0,
       category: "",
+      hasSpecialOfferToday: false,
     });
     setSelectedProduct(null);
     setOldImages([]); // تأكد من إعادة تعيين الصور القديمة أيضاً
@@ -203,6 +206,7 @@ const Products = () => {
       images: product.image || [], // نضع الصور الموجودة
       discount: product.discount || 0,
       category: product.category?._id || product.category || "",
+      hasSpecialOfferToday: product.hasSpecialOfferToday || false,
     });
     // إعادة تعيين الصور القديمة والمحذوفة
     setOldImages(product.image || []);
@@ -438,6 +442,11 @@ const Products = () => {
                       <h3 className="text-lg font-semibold text-gray-900 mb-1">
                         {product.name}
                       </h3>
+                      {product.hasSpecialOfferToday && (
+                        <span className="inline-block bg-red-100 text-red-800 text-xs px-2 py-0.5 rounded-full mb-1">
+                          عرض خاص اليوم
+                        </span>
+                      )}
                       <p className="text-sm text-gray-500">{product.code}</p>
                     </div>
                     <div className="flex space-x-1 space-x-reverse">
@@ -703,6 +712,27 @@ const Products = () => {
                       </span>
                     )}
                   </div>
+                </div>
+
+                <div className="flex items-center space-x-2 space-x-reverse mt-4">
+                  <input
+                    type="checkbox"
+                    id="hasSpecialOfferToday"
+                    checked={formData.hasSpecialOfferToday}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        hasSpecialOfferToday: e.target.checked,
+                      })
+                    }
+                    className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                  />
+                  <label
+                    htmlFor="hasSpecialOfferToday"
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    عرض خاص اليوم
+                  </label>
                 </div>
 
                 <div>

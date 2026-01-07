@@ -17,6 +17,7 @@ import PublicRoute from "./components/PublicRoute";
 import Orders from "./pages/Orders";
 import Traders from "./pages/Traders";
 import TraderPage from "./pages/TraderPage";
+import SystemSettings from "./pages/SystemSettings";
 
 const queryClient = new QueryClient();
 
@@ -97,6 +98,14 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <TraderPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <SystemSettings />
               </ProtectedRoute>
             }
           />
