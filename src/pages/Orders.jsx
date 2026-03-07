@@ -427,6 +427,7 @@ const Orders = () => {
           onUpdateStatus={updateOrderStatus}
           onEdit={openEditModal}
           onDelete={handleDelete}
+          userRole={userRole}
         />
 
         {/* Use AddEditModal component */}

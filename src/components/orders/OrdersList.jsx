@@ -19,6 +19,7 @@ const OrdersList = ({
   onUpdateStatus,
   onEdit,
   onDelete,
+  userRole,
 }) => {
   const [expandedOrderId, setExpandedOrderId] = useState(null);
 
@@ -197,16 +198,18 @@ const OrdersList = ({
                         >
                           <Edit className="h-4 w-4" />
                         </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDelete(order._id);
-                          }}
-                          className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
-                          title="حذف"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                        {userRole !== "admin" && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDelete(order._id);
+                            }}
+                            className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
+                            title="حذف"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
