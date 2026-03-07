@@ -3,6 +3,8 @@ import { Edit, Printer, Trash2 } from "lucide-react";
 
 const statusColors = {
   معلق: "bg-yellow-200 text-yellow-800",
+  "معلق-1": "bg-orange-200 text-orange-800",
+  "معلق-2": "bg-teal-200 text-teal-800",
   "تم الشحن": "bg-blue-200 text-blue-800",
   مؤكد: "bg-green-200 text-green-800",
   ملغي: "bg-red-200 text-red-800",
@@ -131,22 +133,23 @@ const OrdersList = ({
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[800px]">
+            <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-32 sm:w-auto">
                 رقم الفاتورة
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider max-w-[150px] sm:max-w-xs">
                 اسم العميل
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
                 رقم الهاتف
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
                 الحالة
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-24 sm:w-32">
                 الإجراءات
               </th>
             </tr>
@@ -163,7 +166,10 @@ const OrdersList = ({
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {order.invoiceNumber}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td 
+                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 max-w-[150px] sm:max-w-xs truncate"
+                      title={order.customerName}
+                    >
                       {order.customerName}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -206,26 +212,27 @@ const OrdersList = ({
                   </tr>
                   {isExpanded && (
                     <tr>
-                      <td colSpan="5" className="bg-gray-50 px-6 py-4">
-                        <div className="space-y-2 text-sm text-gray-700">
-                          <div>
-                            <strong>العنوان:</strong> {order.address}
+                      <td colSpan="5" className="bg-gray-50 px-4 py-4 sm:px-6">
+                        <div className="text-sm text-gray-700">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                            <div>
+                              <strong>العنوان:</strong> {order.address}
+                            </div>
+                            <div>
+                              <strong>المحافظة:</strong> {order.governorate}
+                            </div>
+                            <div>
+                              <strong>الشحن:</strong> {order.shippingCost} جنيه
+                            </div>
+                            <div>
+                              <strong>اجمالى السعر:</strong> {order.totalPrice} جنيه
+                            </div>
+                            <div className="sm:col-span-2">
+                              <strong>ملاحظات:</strong> {order.notes || "-"}
+                            </div>
                           </div>
-                          <div>
-                            <strong>المحافظة:</strong> {order.governorate}
-                          </div>
-                          <div>
-                            <strong>الشحن:</strong> {order.shippingCost}
-                          </div>
-                          <div>
-                            <strong>اجمالى السعر:</strong> {order.totalPrice}
-                          </div>
-
-                          <div>
-                            <strong>ملاحظات:</strong> {order.notes || "-"}
-                          </div>
-                          <div>
-                            <strong>المنتجات:</strong>
+                          <div className="mb-4">
+                            <strong className="block mb-2">المنتجات:</strong>
                             <ul className="list-disc list-inside ml-4">
                               {order.products.map((p, i) => (
                                 <li key={i}>
@@ -235,7 +242,7 @@ const OrdersList = ({
                               ))}
                             </ul>
                           </div>
-                          <div className="mt-2 flex space-x-2 space-x-reverse">
+                          <div className="mt-4 flex flex-wrap gap-2">
                             {statusOptions.map((status) => (
                               <button
                                 key={status}
@@ -243,7 +250,7 @@ const OrdersList = ({
                                   onUpdateStatus(order._id, status)
                                 }
                                 disabled={order.status === status}
-                                className={`px-3 py-1 rounded text-xs font-semibold ${
+                                className={`px-3 py-1.5 rounded text-xs font-semibold whitespace-nowrap ${
                                   order.status === status
                                     ? "bg-gray-300 text-gray-600 cursor-not-allowed"
                                     : "bg-red-600 text-white hover:bg-red-700"
@@ -271,6 +278,7 @@ const OrdersList = ({
             })}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

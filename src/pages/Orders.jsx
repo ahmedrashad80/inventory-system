@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { Package, Plus, Search, ArrowLeft } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Package, Plus, Search, ArrowLeft, LogOut } from "lucide-react";
 import EditShippingCostModal from "../components/shipping/EditShippingCostModal"; // import modal
 import axios from "axios";
 import { toast } from "@/hooks/use-toast";
@@ -21,6 +21,9 @@ const Orders = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  
+  const [userRole, setUserRole] = useState(null);
+  const navigate = useNavigate();
 
   const [showEditCostShipping, setShowEditCostShipping] = useState(false);
   const [shippingGovernorates, setShippingGovernorates] = useState([]);
@@ -69,6 +72,15 @@ const Orders = () => {
 
   useEffect(() => {
     fetchOrders();
+    // Fetch user role
+    axios
+      .get(`${import.meta.env.VITE_API_URL}api/user/verify`, {
+        withCredentials: true,
+      })
+      .then((res) => {
+        setUserRole(res.data.user.role);
+      })
+      .catch((err) => console.error("Failed to verify user role:", err));
   }, []);
 
   // Filter orders by status and search term
@@ -319,15 +331,33 @@ const Orders = () => {
     >
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-4 space-x-reverse">
-            <Link
-              to="/"
-              className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              <ArrowLeft className="h-5 w-5 ml-2" />
-              العودة للرئيسية
-            </Link>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="flex items-center space-x-2 sm:space-x-4 space-x-reverse">
+            {userRole === "admin" ? (
+              <button
+                onClick={async () => {
+                  try {
+                    await axios.post(`${import.meta.env.VITE_API_URL}api/user/logout`, {}, { withCredentials: true });
+                    navigate("/login");
+                  } catch (error) {
+                    console.error("Logout error", error);
+                  }
+                }}
+                className="flex items-center text-red-600 hover:text-red-800 transition-colors"
+              >
+                <LogOut className="h-5 w-5 ml-2" />
+                تسجيل الخروج
+              </button>
+            ) : (
+              <Link
+                to="/"
+                className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+                title="العودة للرئيسية"
+              >
+                <ArrowLeft className="h-5 w-5 ml-2" />
+                العودة للرئيسية
+              </Link>
+            )}
             <div className="w-px h-6 bg-gray-300"></div>
             <div className="flex items-center space-x-3 space-x-reverse">
               <div className="bg-gradient-to-r from-red-600 to-red-700 p-2 rounded-lg">
@@ -375,7 +405,7 @@ const Orders = () => {
           governorates={shippingGovernorates}
         />
 
-        <div className="relative max-w-md mt-4 my-6">
+        <div className="relative w-full sm:max-w-md mt-4 mb-6 mx-auto sm:mx-0">
           <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input
             type="text"

@@ -3,6 +3,8 @@ import React from "react";
 const statuses = [
   { label: "الكل", value: "all" },
   { label: "معلق", value: "معلق" },
+  { label: "معلق-1", value: "معلق-1" },
+  { label: "معلق-2", value: "معلق-2" },
   { label: "تم الشحن", value: "تم الشحن" },
   { label: "مؤكد", value: "مؤكد" },
   { label: "ملغي", value: "ملغي" },
@@ -13,7 +15,7 @@ const OrdersFilter = ({ statusFilter, setStatusFilter }) => {
   return (
     // i want to add align center for div
     // the calss you should add is flex justify-center items-center
-    <div className="flex space-x-2 space-x-reverse overflow-x-auto mb-2 justify-center items-center">
+    <div className="flex flex-wrap gap-2 mb-2 justify-center items-center">
       {statuses.map(({ label, value }) => (
         <button
           key={value}

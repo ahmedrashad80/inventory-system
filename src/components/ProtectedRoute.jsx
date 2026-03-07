@@ -28,8 +28,9 @@ const ProtectedRoute = ({ children }) => {
   if (loading) return null;
 
   if (!authenticated) return <Navigate to="/login" replace />;
-  // if (userRole === "admin") return <Navigate to="/orders" replace />;
+
   if (userRole === "admin") {
+    // If an admin tries to access anything other than /orders, redirect them
     const currentPath = window.location.pathname;
     if (currentPath !== "/orders") {
       return <Navigate to="/orders" replace />;
