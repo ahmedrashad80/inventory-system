@@ -85,7 +85,7 @@ const Products = () => {
         description: formData.description || "",
         components: formData.components || [],
         discount: formData.discount || 0,
-        category: formData.category || null,
+        category: formData.category || undefined,
         hasSpecialOfferToday: formData.hasSpecialOfferToday || false,
       };
 
