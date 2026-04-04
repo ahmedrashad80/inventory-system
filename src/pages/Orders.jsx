@@ -267,8 +267,8 @@ const Orders = () => {
     const totalRevenue = orders.reduce(
       (sum, order) =>
         order.status === "تم الشحن"
-          ? sum +
-            order.products.reduce((pSum, p) => pSum + p.price * p.quantity, 0)
+          ? sum +ٍ
+            order.products.reduce((pSum, p) => pSum + ((p.price * (100 - p.discount)) / 100) * p.quantity, 0)
           : sum,
       0
     );
